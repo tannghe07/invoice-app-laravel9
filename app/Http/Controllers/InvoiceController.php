@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\InvoiceDetail;
+use App\Models\Transaction;
 use Carbon\Carbon;
 
 class InvoiceController extends Controller
@@ -113,6 +114,15 @@ class InvoiceController extends Controller
             'invoice_id' => $invoice->id,
             'product_name' => $validated['product_name'],
             'price' => $validated['price'],
+        ]);
+
+        // Create transaction record (income)
+        Transaction::create([
+            'amount' => $total_amount,
+            'description' => 'Thu tiền từ hóa đơn: ' . $validated['product_name'] . ' - Khách: ' . $customer->name,
+            'transaction_date' => $validated['invoice_date'],
+            'type' => 'income',
+            'invoice_id' => $invoice->id,
         ]);
 
         return response()->json([

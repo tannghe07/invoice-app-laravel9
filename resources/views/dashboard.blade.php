@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +13,12 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             background: #f5f7fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .sidebar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -33,20 +36,24 @@
             display: flex;
             flex-direction: column;
         }
+
         .sidebar.active {
             right: 0;
         }
+
         .navbar {
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
+
         .navbar-brand {
             color: #667eea !important;
             font-weight: bold;
             font-size: 20px;
             margin-right: 40px;
         }
+
         .nav-menu {
             display: flex;
             gap: 5px;
@@ -54,9 +61,11 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         .nav-item {
             position: relative;
         }
+
         .nav-link {
             display: inline-block;
             padding: 10px 20px;
@@ -67,24 +76,30 @@
             transition: all 0.3s ease;
             white-space: nowrap;
         }
+
         .nav-link:hover {
             background: #f0f0f0;
             color: #667eea;
         }
+
         .nav-link.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+
         .nav-link i {
             margin-right: 8px;
         }
+
         .container-main {
             margin-left: 0;
             transition: margin-left 0.3s ease;
         }
+
         .container-main.sidebar-open {
             margin-left: -500px;
         }
+
         .filters {
             background: white;
             padding: 20px;
@@ -92,26 +107,33 @@
             margin-bottom: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .filter-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             align-items: flex-end;
         }
+
         .form-group label {
             font-weight: 600;
             color: #333;
             margin-bottom: 8px;
         }
-        .form-control, .form-select {
+
+        .form-control,
+        .form-select {
             border: 1px solid #ddd;
             border-radius: 5px;
             height: 40px;
         }
-        .form-control:focus, .form-select:focus {
+
+        .form-control:focus,
+        .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
+
         .btn-filter {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -120,10 +142,12 @@
             border-radius: 5px;
             font-weight: 600;
         }
+
         .btn-filter:hover {
             background: linear-gradient(135deg, #5568d3 0%, #6a3f94 100%);
             color: white;
         }
+
         .btn-add-invoice {
             position: fixed;
             right: 30px;
@@ -140,33 +164,40 @@
             transition: transform 0.3s ease;
             z-index: 999;
         }
+
         .btn-add-invoice:hover {
             transform: scale(1.1);
         }
+
         .table {
             background: white;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .table thead {
             background: #f8f9fa;
             border-bottom: 2px solid #ddd;
         }
+
         .table th {
             font-weight: 600;
             color: #333;
             padding: 15px;
             text-align: center;
         }
+
         .table td {
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid #eee;
         }
+
         .table tbody tr:hover {
             background: #f8f9fa;
         }
+
         .status-paid {
             background: #d4edda;
             color: #155724;
@@ -175,6 +206,7 @@
             font-size: 12px;
             font-weight: 600;
         }
+
         .status-pending {
             background: #fff3cd;
             color: #856404;
@@ -183,42 +215,51 @@
             font-size: 12px;
             font-weight: 600;
         }
+
         .action-buttons {
             display: flex;
             gap: 8px;
             justify-content: center;
         }
+
         .btn-sm {
             padding: 5px 10px;
             font-size: 12px;
         }
+
         .btn-view {
             background: #17a2b8;
             border: none;
             color: white;
         }
+
         .btn-view:hover {
             background: #138496;
             color: white;
         }
+
         .btn-edit {
             background: #ffc107;
             border: none;
             color: white;
         }
+
         .btn-edit:hover {
             background: #e0a800;
             color: white;
         }
+
         .btn-delete {
             background: #dc3545;
             border: none;
             color: white;
         }
+
         .btn-delete:hover {
             background: #c82333;
             color: white;
         }
+
         .sidebar-title {
             font-size: 20px;
             font-weight: bold;
@@ -229,6 +270,7 @@
             padding-right: 30px;
             flex-shrink: 0;
         }
+
         #invoice-form {
             display: flex;
             flex-direction: column;
@@ -236,24 +278,30 @@
             overflow-y: auto;
             padding-right: 5px;
         }
+
         #invoice-form::-webkit-scrollbar {
             width: 6px;
         }
+
         #invoice-form::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
         }
+
         #invoice-form::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.3);
             border-radius: 3px;
         }
+
         #invoice-form::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+
         .form-group-sidebar {
             margin-bottom: 10px;
             flex-shrink: 0;
         }
+
         .form-group-sidebar label {
             color: white;
             font-weight: 600;
@@ -261,6 +309,7 @@
             display: block;
             font-size: 13px;
         }
+
         .form-group-sidebar input,
         .form-group-sidebar select {
             width: 100%;
@@ -273,15 +322,18 @@
             font-size: 13px;
             height: 35px;
         }
+
         .form-group-sidebar input::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
+
         .form-group-sidebar input:focus,
         .form-group-sidebar select:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.3);
             border-color: white;
         }
+
         .btn-submit-invoice {
             width: 100%;
             background: #4CAF50;
@@ -297,9 +349,11 @@
             flex-shrink: 0;
             margin-bottom: 15px;
         }
+
         .btn-submit-invoice:hover {
             background: #45a049;
         }
+
         .btn-close-sidebar {
             position: absolute;
             top: 15px;
@@ -310,6 +364,7 @@
             font-size: 24px;
             cursor: pointer;
         }
+
         .overlay {
             display: none;
             position: fixed;
@@ -320,9 +375,11 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
+
         .overlay.active {
             display: block;
         }
+
         .modal-popup {
             display: none;
             position: fixed;
@@ -339,9 +396,11 @@
             max-height: 90vh;
             overflow-y: auto;
         }
+
         .modal-popup.active {
             display: block;
         }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -350,10 +409,12 @@
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
         }
+
         .modal-header h3 {
             margin: 0;
             color: #333;
         }
+
         .modal-close {
             background: none;
             border: none;
@@ -361,67 +422,83 @@
             cursor: pointer;
             color: #999;
         }
+
         .invoice-info {
             margin-bottom: 15px;
         }
+
         .invoice-info-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
+
         .invoice-info-label {
             font-weight: 600;
             color: #666;
         }
+
         .invoice-info-value {
             color: #333;
         }
+
         .modal-actions {
             display: flex;
             gap: 10px;
             margin-top: 20px;
             justify-content: center;
         }
-        .btn-pdf, .btn-print {
+
+        .btn-pdf,
+        .btn-print {
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: 600;
         }
+
         .btn-pdf {
             background: #e74c3c;
             color: white;
         }
+
         .btn-pdf:hover {
             background: #c0392b;
         }
+
         .btn-print {
             background: #3498db;
             color: white;
         }
+
         .btn-print:hover {
             background: #2980b9;
         }
+
         .loading {
             text-align: center;
             padding: 20px;
             color: #999;
         }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #999;
         }
+
         .empty-state-icon {
             font-size: 60px;
             margin-bottom: 20px;
             opacity: 0.5;
         }
+
         .navbar-logout {
             margin-left: auto;
         }
+
         .customer-list {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 5px;
@@ -429,6 +506,7 @@
             overflow-y: auto;
             margin-bottom: 15px;
         }
+
         .customer-option {
             padding: 10px;
             cursor: pointer;
@@ -436,18 +514,20 @@
             color: white;
             transition: background 0.2s ease;
         }
+
         .customer-option:hover {
             background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <span class="navbar-brand">
                 <i class="bi bi-receipt"></i> Invoices App
             </span>
-            
+
             <!-- Menu Top -->
             <div class="nav-menu">
                 <div class="nav-item">
@@ -461,12 +541,12 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="{{ route('revenue.dashboard') }}" class="nav-link">
-                        <i class="bi bi-bar-chart"></i> Thống kê doanh thu
+                    <a href="{{ route('transactions.index') }}" class="nav-link">
+                        <i class="bi bi-wallet2"></i> Quản lý thu chi
                     </a>
                 </div>
             </div>
-            
+
             <div class="navbar-logout">
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                     @csrf
@@ -550,7 +630,7 @@
 
         <form id="invoice-form">
             @csrf
-            
+
             <!-- Customer Selection -->
             <div class="form-group-sidebar">
                 <label>Khách hàng</label>
@@ -573,7 +653,8 @@
             <div class="form-group-sidebar">
                 <label for="customer_phone">Số điện thoại khách *</label>
                 <input type="tel" id="customer_phone" name="customer_phone" placeholder="Nhập số điện thoại" required>
-                <div id="phone-error" style="color: #ff6b6b; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;"></div>
+                <div id="phone-error"
+                    style="color: #ff6b6b; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;"></div>
             </div>
 
             <div class="form-group-sidebar">
@@ -729,7 +810,7 @@
             if (customerId) {
                 const customerName = option.text;
                 const customerPhone = option.getAttribute('data-phone');
-                
+
                 document.getElementById('customer_id').value = customerId;
                 document.getElementById('customer_name').value = customerName;
                 document.getElementById('customer_phone').value = customerPhone;
@@ -738,7 +819,7 @@
                 document.getElementById('customer_name').value = '';
                 document.getElementById('customer_phone').value = '';
             }
-            
+
             // Clear phone error when selecting from dropdown
             document.getElementById('phone-error').style.display = 'none';
             document.querySelector('.btn-submit-invoice').disabled = false;
@@ -796,7 +877,7 @@
         }
 
         // Create invoice
-        document.getElementById('invoice-form').addEventListener('submit', function(e) {
+        document.getElementById('invoice-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
 
@@ -808,21 +889,21 @@
                 },
                 body: formData
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Tạo hóa đơn thành công!');
-                    closeSidebar();
-                    loadInvoices();
-                    showInvoiceModal(data.invoice);
-                } else {
-                    alert('Có lỗi xảy ra');
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('Lỗi: ' + err.message);
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Tạo hóa đơn thành công!');
+                        closeSidebar();
+                        loadInvoices();
+                        showInvoiceModal(data.invoice);
+                    } else {
+                        alert('Có lỗi xảy ra');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Lỗi: ' + err.message);
+                });
         });
 
         // View invoice
@@ -887,9 +968,9 @@
                     <div class="invoice-info-row">
                         <span class="invoice-info-label">Trạng thái:</span>
                         <span class="invoice-info-value">
-                            ${invoice.status === 'paid' 
-                                ? '<span class="status-paid">Đã xong</span>' 
-                                : '<span class="status-pending">Còn nợ</span>'}
+                            ${invoice.status === 'paid'
+                    ? '<span class="status-paid">Đã xong</span>'
+                    : '<span class="status-pending">Còn nợ</span>'}
                         </span>
                     </div>
                 </div>
@@ -915,15 +996,15 @@
                 },
                 body: JSON.stringify({ status: newStatus })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Cập nhật thành công');
-                    loadInvoices();
-                    closeModal();
-                }
-            })
-            .catch(err => console.error('Error:', err));
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Cập nhật thành công');
+                        loadInvoices();
+                        closeModal();
+                    }
+                })
+                .catch(err => console.error('Error:', err));
         }
 
         // Delete invoice
@@ -936,15 +1017,15 @@
                         'Accept': 'application/json',
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Xóa thành công');
-                        loadInvoices();
-                        closeModal();
-                    }
-                })
-                .catch(err => console.error('Error:', err));
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Xóa thành công');
+                            loadInvoices();
+                            closeModal();
+                        }
+                    })
+                    .catch(err => console.error('Error:', err));
             }
         }
 
@@ -978,4 +1059,5 @@
         loadInvoices();
     </script>
 </body>
+
 </html>
