@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,21 +13,25 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             background: #f5f7fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .navbar {
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
+
         .navbar-brand {
             color: #667eea !important;
             font-weight: bold;
             font-size: 20px;
             margin-right: 40px;
         }
+
         .nav-menu {
             display: flex;
             gap: 5px;
@@ -34,9 +39,11 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         .nav-item {
             position: relative;
         }
+
         .nav-link {
             display: inline-block;
             padding: 10px 20px;
@@ -47,35 +54,43 @@
             transition: all 0.3s ease;
             white-space: nowrap;
         }
+
         .nav-link:hover {
             background: #f0f0f0;
             color: #667eea;
         }
+
         .nav-link.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+
         .nav-link i {
             margin-right: 8px;
         }
+
         .navbar-logout {
             margin-left: auto;
         }
+
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
+
         .page-title {
             font-size: 28px;
             font-weight: bold;
             color: #333;
         }
+
         .page-title i {
             margin-right: 10px;
             color: #667eea;
         }
+
         .btn-add {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -86,12 +101,14 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         .btn-add:hover {
             background: linear-gradient(135deg, #5568d3 0%, #6a3f94 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
             color: white;
         }
+
         .filters {
             background: white;
             padding: 20px;
@@ -99,26 +116,33 @@
             margin-bottom: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .filter-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             align-items: flex-end;
         }
+
         .form-group label {
             font-weight: 600;
             color: #333;
             margin-bottom: 8px;
         }
-        .form-control, .form-select {
+
+        .form-control,
+        .form-select {
             border: 1px solid #ddd;
             border-radius: 5px;
             height: 40px;
         }
-        .form-control:focus, .form-select:focus {
+
+        .form-control:focus,
+        .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
+
         .btn-filter {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -127,67 +151,81 @@
             border-radius: 5px;
             font-weight: 600;
         }
+
         .btn-filter:hover {
             background: linear-gradient(135deg, #5568d3 0%, #6a3f94 100%);
             color: white;
         }
+
         .table {
             background: white;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .table thead {
             background: #f8f9fa;
             border-bottom: 2px solid #ddd;
         }
+
         .table th {
             font-weight: 600;
             color: #333;
             padding: 15px;
             text-align: center;
         }
+
         .table td {
             padding: 12px 15px;
             text-align: center;
             border-bottom: 1px solid #eee;
         }
+
         .table tbody tr:hover {
             background: #f8f9fa;
         }
+
         .action-buttons {
             display: flex;
             gap: 8px;
             justify-content: center;
             flex-wrap: wrap;
         }
+
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
         }
+
         .btn-edit {
             background: #ffc107;
             border: none;
             color: white;
         }
+
         .btn-edit:hover {
             background: #e0a800;
             color: white;
         }
+
         .btn-delete {
             background: #dc3545;
             border: none;
             color: white;
         }
+
         .btn-delete:hover {
             background: #c82333;
             color: white;
         }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #999;
         }
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -198,11 +236,13 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
         }
+
         .modal-overlay.active {
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         .modal-content {
             background: white;
             padding: 30px;
@@ -212,16 +252,19 @@
             width: 90%;
             animation: slideIn 0.3s ease;
         }
+
         @keyframes slideIn {
             from {
                 transform: translateY(-50px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -230,10 +273,12 @@
             padding-bottom: 15px;
             border-bottom: 2px solid #eee;
         }
+
         .modal-header h3 {
             margin: 0;
             color: #333;
         }
+
         .btn-close-modal {
             background: none;
             border: none;
@@ -241,16 +286,19 @@
             cursor: pointer;
             color: #999;
         }
+
         .form-group-modal {
             margin-bottom: 15px;
         }
+
         .form-group-modal label {
             display: block;
             font-weight: 600;
             color: #333;
             margin-bottom: 5px;
         }
-        .form-group-modal input, 
+
+        .form-group-modal input,
         .form-group-modal textarea {
             width: 100%;
             padding: 10px;
@@ -259,18 +307,21 @@
             font-size: 14px;
             font-family: inherit;
         }
+
         .form-group-modal input:focus,
         .form-group-modal textarea:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
+
         .modal-buttons {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
             margin-top: 20px;
         }
+
         .btn-modal {
             padding: 10px 20px;
             border: none;
@@ -278,26 +329,32 @@
             cursor: pointer;
             font-weight: 600;
         }
+
         .btn-save {
             background: #4CAF50;
             color: white;
         }
+
         .btn-save:hover {
             background: #45a049;
         }
+
         .btn-cancel {
             background: #ccc;
             color: #333;
         }
+
         .btn-cancel:hover {
             background: #bbb;
         }
+
         .required::after {
             content: " *";
             color: #dc3545;
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
@@ -305,7 +362,7 @@
             <span class="navbar-brand">
                 <i class="bi bi-receipt"></i> Invoices App
             </span>
-            
+
             <!-- Menu Top -->
             <div class="nav-menu">
                 <div class="nav-item">
@@ -319,12 +376,12 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="{{ route('revenue.dashboard') }}" class="nav-link">
-                        <i class="bi bi-bar-chart"></i> Thống kê doanh thu
+                    <a href="{{ route('transactions.index') }}" class="nav-link">
+                        <i class="bi bi-wallet2"></i> Quản lý thu chi
                     </a>
                 </div>
             </div>
-            
+
             <div class="navbar-logout">
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                     @csrf
@@ -413,12 +470,15 @@
                 <div class="form-group-modal">
                     <label for="customerPhone" class="required">Số điện thoại</label>
                     <input type="tel" id="customerPhone" name="phone" required placeholder="Nhập số điện thoại">
-                    <div id="phoneError" style="color: #dc3545; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;"></div>
+                    <div id="phoneError"
+                        style="color: #dc3545; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;">
+                    </div>
                 </div>
 
                 <div class="form-group-modal">
                     <label for="customerAddress">Địa chỉ</label>
-                    <textarea id="customerAddress" name="address" rows="3" placeholder="Nhập địa chỉ (tùy chọn)"></textarea>
+                    <textarea id="customerAddress" name="address" rows="3"
+                        placeholder="Nhập địa chỉ (tùy chọn)"></textarea>
                 </div>
 
                 <div class="modal-buttons">
@@ -493,7 +553,7 @@
         }
 
         // Close modal when clicking outside
-        document.getElementById('customerModal').addEventListener('click', function(e) {
+        document.getElementById('customerModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeModal();
             }
@@ -567,26 +627,26 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Xóa thành công');
-                        loadCustomers();
-                    } else {
-                        alert('Lỗi: ' + (data.message || 'Không thể xóa'));
-                    }
-                })
-                .catch(err => console.error('Error:', err));
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Xóa thành công');
+                            loadCustomers();
+                        } else {
+                            alert('Lỗi: ' + (data.message || 'Không thể xóa'));
+                        }
+                    })
+                    .catch(err => console.error('Error:', err));
             }
         }
 
         // Submit form
-        document.getElementById('customerForm').addEventListener('submit', function(e) {
+        document.getElementById('customerForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const customerId = document.getElementById('customerId').value;
             const formData = new FormData(this);
 
-            const url = isEditMode && customerId 
+            const url = isEditMode && customerId
                 ? `{{ route('customers.update', ':id') }}`.replace(':id', customerId)
                 : '{{ route("customers.store") }}';
 
@@ -599,24 +659,25 @@
                 },
                 body: formData
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(isEditMode ? 'Cập nhật thành công' : 'Thêm khách hàng thành công');
-                    closeModal();
-                    loadCustomers();
-                } else {
-                    alert('Lỗi: ' + (data.message || 'Có lỗi xảy ra'));
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('Lỗi: ' + err.message);
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(isEditMode ? 'Cập nhật thành công' : 'Thêm khách hàng thành công');
+                        closeModal();
+                        loadCustomers();
+                    } else {
+                        alert('Lỗi: ' + (data.message || 'Có lỗi xảy ra'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Lỗi: ' + err.message);
+                });
         });
 
         // Load customers on page load
         loadCustomers();
     </script>
 </body>
+
 </html>
