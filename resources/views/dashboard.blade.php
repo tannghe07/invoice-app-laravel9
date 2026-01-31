@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Quản lý Hóa Đơn</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         * {
@@ -19,28 +21,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 15px;
-            color: white;
-            position: fixed;
-            right: -550px;
-            width: 500px;
-            top: 0;
-            z-index: 1000;
-            transition: right 0.3s ease;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar.active {
-            right: 0;
-        }
-
+        /* Navbar */
         .navbar {
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -60,10 +41,6 @@
             align-items: center;
             margin-left: auto;
             margin-right: auto;
-        }
-
-        .nav-item {
-            position: relative;
         }
 
         .nav-link {
@@ -91,15 +68,106 @@
             margin-right: 8px;
         }
 
-        .container-main {
-            margin-left: 0;
-            transition: margin-left 0.3s ease;
+        .navbar-logout {
+            margin-left: auto;
         }
 
-        .container-main.sidebar-open {
-            margin-left: -500px;
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
         }
 
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .page-title i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .btn-create-invoice {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            font-size: 15px;
+        }
+
+        .btn-create-invoice:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f94 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .summary-icon.revenue {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .summary-icon.count {
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+        }
+
+        .summary-info h3 {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .summary-info p {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px 0 0 0;
+            color: #333;
+        }
+
+        /* Filters */
         .filters {
             background: white;
             padding: 20px;
@@ -128,12 +196,6 @@
             height: 40px;
         }
 
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
         .btn-filter {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -144,36 +206,16 @@
         }
 
         .btn-filter:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3f94 100%);
             color: white;
         }
 
-        .btn-add-invoice {
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            transition: transform 0.3s ease;
-            z-index: 999;
-        }
-
-        .btn-add-invoice:hover {
-            transform: scale(1.1);
-        }
-
-        .table {
+        /* Table */
+        .table-container {
             background: white;
+            padding: 25px;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
         }
 
         .table thead {
@@ -185,338 +227,85 @@
             font-weight: 600;
             color: #333;
             padding: 15px;
-            text-align: center;
+            text-align: left;
         }
 
         .table td {
             padding: 15px;
-            text-align: center;
+            text-align: left;
             border-bottom: 1px solid #eee;
-        }
-
-        .table tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status-paid {
-            background: #d4edda;
-            color: #155724;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
+            vertical-align: middle;
         }
 
         .btn-view {
             background: #17a2b8;
             border: none;
             color: white;
-        }
-
-        .btn-view:hover {
-            background: #138496;
-            color: white;
-        }
-
-        .btn-edit {
-            background: #ffc107;
-            border: none;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #e0a800;
-            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
         }
 
         .btn-delete {
             background: #dc3545;
             border: none;
             color: white;
-        }
-
-        .btn-delete:hover {
-            background: #c82333;
-            color: white;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-right: 30px;
-            flex-shrink: 0;
-        }
-
-        #invoice-form {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        #invoice-form::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #invoice-form::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        #invoice-form::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-
-        #invoice-form::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .form-group-sidebar {
-            margin-bottom: 10px;
-            flex-shrink: 0;
-        }
-
-        .form-group-sidebar label {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 4px;
-            display: block;
-            font-size: 13px;
-        }
-
-        .form-group-sidebar input,
-        .form-group-sidebar select {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            font-size: 13px;
-            height: 35px;
-        }
-
-        .form-group-sidebar input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .form-group-sidebar input:focus,
-        .form-group-sidebar select:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.3);
-            border-color: white;
-        }
-
-        .btn-submit-invoice {
-            width: 100%;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px;
+            padding: 5px 10px;
             border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            font-size: 14px;
-            position: static;
-            flex-shrink: 0;
-            margin-bottom: 15px;
+            font-size: 12px;
         }
 
-        .btn-submit-invoice:hover {
-            background: #45a049;
-        }
-
-        .btn-close-sidebar {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        .modal-popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-popup.active {
-            display: block;
-        }
-
+        /* Modal */
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 15px;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            color: #333;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .invoice-info {
-            margin-bottom: 15px;
-        }
-
-        .invoice-info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .invoice-info-label {
-            font-weight: 600;
-            color: #666;
-        }
-
-        .invoice-info-value {
-            color: #333;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: center;
-        }
-
-        .btn-pdf,
-        .btn-print {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn-pdf {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        .btn-pdf:hover {
-            background: #c0392b;
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
         }
 
-        .btn-print {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-print:hover {
-            background: #2980b9;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .navbar-logout {
-            margin-left: auto;
-        }
-
-        .customer-list {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-
-        .customer-option {
+        .product-row {
+            background: #f9f9f9;
             padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            transition: background 0.2s ease;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
         }
 
-        .customer-option:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .btn-remove-item {
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            background: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-remove-item:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Select2 override */
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px;
         }
     </style>
 </head>
@@ -528,7 +317,6 @@
                 <i class="bi bi-receipt"></i> Invoices App
             </span>
 
-            <!-- Menu Top -->
             <div class="nav-menu">
                 <div class="nav-item">
                     <a href="{{ route('dashboard') }}" class="nav-link active">
@@ -545,6 +333,16 @@
                         <i class="bi bi-wallet2"></i> Quản lý thu chi
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('products.index') }}" class="nav-link">
+                        <i class="bi bi-box-seam"></i> Quản lý kho hàng
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('returns.index') }}" class="nav-link">
+                        <i class="bi bi-arrow-return-left"></i> Quản lý trả hàng
+                    </a>
+                </div>
             </div>
 
             <div class="navbar-logout">
@@ -558,505 +356,602 @@
         </div>
     </nav>
 
-    <div class="container-fluid container-main">
-        <div class="px-4">
-            <!-- Filters -->
-            <div class="filters">
-                <h5 class="mb-20" style="margin-bottom: 20px;">Bộ lọc</h5>
-                <div class="filter-row">
-                    <div class="form-group">
-                        <label for="filter_customer">Tên khách hàng</label>
-                        <input type="text" class="form-control" id="filter_customer" placeholder="Nhập tên khách">
-                    </div>
-                    <div class="form-group">
-                        <label for="filter_from_date">Từ ngày</label>
-                        <input type="date" class="form-control" id="filter_from_date">
-                    </div>
-                    <div class="form-group">
-                        <label for="filter_to_date">Đến ngày</label>
-                        <input type="date" class="form-control" id="filter_to_date">
-                    </div>
-                    <div class="form-group">
-                        <label for="filter_status">Trạng thái</label>
-                        <select class="form-select" id="filter_status">
-                            <option value="">Tất cả</option>
-                            <option value="pending">Còn nợ</option>
-                            <option value="paid">Đã xong</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-filter" onclick="loadInvoices()">
-                        <i class="bi bi-search"></i> Tìm kiếm
-                    </button>
+    <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="bi bi-file-earmark-text"></i> Quản lý Hóa Đơn
+            </h1>
+            <button class="btn-create-invoice" onclick="openCreateModal()">
+                <i class="bi bi-plus-circle"></i> Tạo Hóa Đơn Mới
+            </button>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-icon revenue">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="summary-info">
+                    <h3>Tổng Doanh Thu</h3>
+                    <p id="total-revenue">0 đ</p>
                 </div>
             </div>
+            <div class="summary-card">
+                <div class="summary-icon count">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <div class="summary-info">
+                    <h3>Tổng Số Hóa Đơn</h3>
+                    <p id="total-count">0</p>
+                </div>
+            </div>
+        </div>
 
-            <!-- Table -->
-            <div id="invoices-container">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%">STT</th>
-                                <th style="width: 15%">Tên khách hàng</th>
-                                <th style="width: 20%">Tên mặt hàng</th>
-                                <th style="width: 12%">Sdt khách</th>
-                                <th style="width: 10%">Trạng thái</th>
-                                <th style="width: 38%">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invoices-tbody">
-                            <tr>
-                                <td colspan="6" class="loading">
-                                    <div class="spinner-border spinner-border-sm" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    Đang tải...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Filters -->
+        <div class="filters">
+            <h5 class="mb-3">Bộ lọc</h5>
+            <div class="filter-row">
+                <div class="form-group">
+                    <label>Khách hàng</label>
+                    <select class="form-select" id="filter_customer">
+                        <option value="">-- Tất cả khách hàng --</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}">{{ $customer->name }} - {{ $customer->phone }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Từ ngày</label>
+                    <input type="date" class="form-control" id="filter_from_date">
+                </div>
+                <div class="form-group">
+                    <label>Đến ngày</label>
+                    <input type="date" class="form-control" id="filter_to_date">
+                </div>
+                <button class="btn btn-filter" onclick="loadInvoices()">
+                    <i class="bi bi-search"></i> Tìm kiếm
+                </button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Ngày lập</th>
+                            <th>Khách hàng</th>
+                            <th>Số điện thoại</th>
+                            <th>Sản phẩm</th>
+                            <th>Tổng tiền</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoices-tbody">
+                        <tr>
+                            <td colspan="7" class="text-center">Đang tải...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div class="modal fade" id="createInvoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tạo Hóa Đơn Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-invoice-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Chọn Khách Hàng *</label>
+                                <select class="form-select select2" id="customer_id" name="customer_id" required
+                                    style="width: 100%">
+                                    <option value="">-- Chọn khách hàng --</option>
+                                    @foreach($customers as $customer)
+                                        <option value="{{ $customer->id }}" data-phone="{{ $customer->phone ?? '' }}">
+                                            {{ $customer->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số Điện Thoại</label>
+                                <input type="text" class="form-control" id="customer_phone" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ngày lập hóa đơn</label>
+                            <input type="date" class="form-control" id="invoice_date" name="invoice_date" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-flex justify-content-between align-items-center">
+                                <span>Danh sách sản phẩm</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProductRow()">
+                                    <i class="bi bi-plus"></i> Thêm sản phẩm
+                                </button>
+                            </label>
+                            <div id="product-list">
+                                <!-- Product Rows -->
+                            </div>
+                        </div>
+
+                        <div class="mb-3 text-end">
+                            <h4>Tổng Tiền: <span id="grand-total" class="text-primary">0 đ</span></h4>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="btn-submit-invoice" onclick="submitInvoice()">Tạo
+                        Hóa Đơn</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar (Side Tab) -->
-    <div class="overlay" id="overlay"></div>
-    <div class="sidebar" id="sidebar">
-        <button class="btn-close-sidebar" onclick="closeSidebar()">×</button>
-        <div class="sidebar-title">
-            <i class="bi bi-plus-circle"></i> Tạo Hóa Đơn
+    <!-- Invoice Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi Tiết Hóa Đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detail-content">
+                    Loading...
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info text-white" onclick="printInvoice()">
+                        <i class="bi bi-printer"></i> In Hóa Đơn
+                    </button>
+                    <button class="btn btn-danger" onclick="downloadPDF()">
+                        <i class="bi bi-file-pdf"></i> Xuất PDF
+                    </button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <form id="invoice-form">
-            @csrf
-
-            <!-- Customer Selection -->
-            <div class="form-group-sidebar">
-                <label>Khách hàng</label>
-                <select id="customer_select" onchange="selectCustomer()">
-                    <option value="">-- Tạo khách mới --</option>
-                    @foreach($customers as $customer)
-                        <option value="{{ $customer->id }}" data-phone="{{ $customer->phone }}">
-                            {{ $customer->name }}
+    <!-- Hidden template for product row -->
+    <template id="product-row-template">
+        <div class="product-row">
+            <div style="flex: 2">
+                <label class="form-label small">Sản phẩm</label>
+                <select class="form-select product-select" onchange="updateProductPrice(this)" required>
+                    <option value="">-- Chọn sản phẩm --</option>
+                    @foreach($products as $product)
+                        <option value="{{ $product->id }}" data-price="{{ $product->price }}" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
+                            {{ $product->name }}
+                            ({{ $product->quantity > 0 ? 'Tồn: ' . $product->quantity : 'Hết hàng' }})
                         </option>
                     @endforeach
                 </select>
-                <input type="hidden" id="customer_id" name="customer_id">
             </div>
-
-            <div class="form-group-sidebar">
-                <label for="customer_name">Tên khách hàng *</label>
-                <input type="text" id="customer_name" name="customer_name" placeholder="Nhập tên khách hàng" required>
+            <div style="flex: 1">
+                <label class="form-label small">Đơn giá</label>
+                <input type="text" class="form-control price-input" readonly value="0">
             </div>
-
-            <div class="form-group-sidebar">
-                <label for="customer_phone">Số điện thoại khách *</label>
-                <input type="tel" id="customer_phone" name="customer_phone" placeholder="Nhập số điện thoại" required>
-                <div id="phone-error"
-                    style="color: #ff6b6b; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;"></div>
+            <div style="flex: 1">
+                <label class="form-label small">Số lượng</label>
+                <input type="number" class="form-control qty-input" min="1" value="1" oninput="calculateRowTotal(this)">
             </div>
-
-            <div class="form-group-sidebar">
-                <label for="customer_address">Địa chỉ</label>
-                <input type="text" id="customer_address" name="customer_address" placeholder="Nhập địa chỉ (tùy chọn)">
+            <div style="flex: 1">
+                <label class="form-label small">Thành tiền</label>
+                <input type="text" class="form-control total-input" readonly value="0">
             </div>
-
-            <div class="form-group-sidebar">
-                <label for="invoice_date">Ngày lập hóa đơn *</label>
-                <input type="date" id="invoice_date" name="invoice_date" required>
-            </div>
-
-            <div class="form-group-sidebar">
-                <label for="product_name">Tên sản phẩm *</label>
-                <input type="text" id="product_name" name="product_name" placeholder="Nhập tên sản phẩm" required>
-            </div>
-
-            <div class="form-group-sidebar">
-                <label for="price">Số tiền sản phẩm *</label>
-                <input type="number" id="price" name="price" placeholder="0" step="0.01" min="0" required>
-            </div>
-
-            <div class="form-group-sidebar">
-                <label for="paid_amount">Số tiền khách trả *</label>
-                <input type="number" id="paid_amount" name="paid_amount" placeholder="0" step="0.01" min="0" required>
-            </div>
-
-            <div class="form-group-sidebar">
-                <label for="change_amount">Số tiền trả khách</label>
-                <input type="number" id="change_amount" name="change_amount" readonly placeholder="Tự tính">
-            </div>
-
-            <div class="form-group-sidebar">
-                <label for="debt_amount">Số tiền khách nợ</label>
-                <input type="number" id="debt_amount" name="debt_amount" readonly placeholder="Tự tính">
-            </div>
-
-            <button type="submit" class="btn-submit-invoice">
-                <i class="bi bi-check-circle"></i> Tạo Hóa Đơn
-            </button>
-        </form>
-    </div>
-
-    <!-- Invoice Details Popup -->
-    <div class="modal-popup" id="invoiceModal">
-        <div class="modal-header">
-            <h3>Chi tiết Hóa Đơn</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-        </div>
-        <div id="invoice-details">
-            <!-- Invoice details will be loaded here -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn-pdf" onclick="exportPdf()">
-                <i class="bi bi-filetype-pdf"></i> Xuất PDF
-            </button>
-            <button class="btn-print" onclick="printInvoice()">
-                <i class="bi bi-printer"></i> In
+            <button type="button" class="btn-remove-item" onclick="removeProductRow(this)">
+                <i class="bi bi-trash"></i>
             </button>
         </div>
-    </div>
+    </template>
 
-    <!-- Add Invoice Button -->
-    <button class="btn-add-invoice" onclick="openSidebar()" title="Tạo hóa đơn">
-        <i class="bi bi-plus"></i>
-    </button>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-        // Set today's date as default
-        document.getElementById('invoice_date').valueAsDate = new Date();
-
-        function openSidebar() {
-            document.getElementById('sidebar').classList.add('active');
-            document.getElementById('overlay').classList.add('active');
-            document.body.style.overflow = 'hidden';
+        // Utils
+        const formatCurrency = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('vi-VN');
         }
 
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-            document.getElementById('overlay').classList.remove('active');
-            document.body.style.overflow = 'auto';
-            document.getElementById('invoice-form').reset();
-            document.getElementById('invoice_date').valueAsDate = new Date();
-            document.getElementById('phone-error').style.display = 'none';
-            document.querySelector('.btn-submit-invoice').disabled = false;
-        }
+        let createModal;
+        let detailModal;
 
-        document.getElementById('overlay').addEventListener('click', closeSidebar);
+        $(document).ready(function () {
+            createModal = new bootstrap.Modal(document.getElementById('createInvoiceModal'));
+            detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
 
-        // Calculate change and debt amounts
-        document.getElementById('price').addEventListener('input', calculateAmounts);
-        document.getElementById('paid_amount').addEventListener('input', calculateAmounts);
-
-        // Check phone number availability
-        document.getElementById('customer_phone').addEventListener('blur', checkPhoneAvailability);
-
-        function checkPhoneAvailability() {
-            const phone = document.getElementById('customer_phone').value.trim();
-            const customerId = document.getElementById('customer_id').value;
-            const phoneErrorDiv = document.getElementById('phone-error');
-            const submitBtn = document.querySelector('.btn-submit-invoice');
-
-            if (!phone) {
-                phoneErrorDiv.style.display = 'none';
-                submitBtn.disabled = false;
-                return;
-            }
-
-            // Check if phone exists
-            const params = new URLSearchParams({
-                phone: phone,
-                customer_id: customerId || ''
+            // Init Select2
+            $('.select2').select2({
+                dropdownParent: $('#createInvoiceModal')
             });
 
-            fetch(`{{ route('customers.check-phone') }}?${params}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.exists) {
-                        phoneErrorDiv.textContent = data.message;
-                        phoneErrorDiv.style.display = 'block';
-                        submitBtn.disabled = true;
-                    } else {
-                        phoneErrorDiv.style.display = 'none';
-                        submitBtn.disabled = false;
-                    }
-                })
-                .catch(err => {
-                    console.error('Error checking phone:', err);
-                    phoneErrorDiv.style.display = 'none';
-                    submitBtn.disabled = false;
-                });
-        }
+            // Customer change listener
+            $('#customer_id').on('change', function () {
+                const phone = $(this).find(':selected').data('phone');
+                $('#customer_phone').val(phone || '');
+            });
 
-        function calculateAmounts() {
-            const price = parseFloat(document.getElementById('price').value) || 0;
-            const paidAmount = parseFloat(document.getElementById('paid_amount').value) || 0;
-            const debtAmount = Math.max(0, price - paidAmount);
-            const changeAmount = Math.max(0, paidAmount - price);
+            loadInvoices();
+        });
 
-            document.getElementById('debt_amount').value = debtAmount.toFixed(2);
-            document.getElementById('change_amount').value = changeAmount.toFixed(2);
-        }
-
-        // Select customer
-        function selectCustomer() {
-            const select = document.getElementById('customer_select');
-            const option = select.options[select.selectedIndex];
-            const customerId = option.value;
-
-            if (customerId) {
-                const customerName = option.text;
-                const customerPhone = option.getAttribute('data-phone');
-
-                document.getElementById('customer_id').value = customerId;
-                document.getElementById('customer_name').value = customerName;
-                document.getElementById('customer_phone').value = customerPhone;
-            } else {
-                document.getElementById('customer_id').value = '';
-                document.getElementById('customer_name').value = '';
-                document.getElementById('customer_phone').value = '';
-            }
-
-            // Clear phone error when selecting from dropdown
-            document.getElementById('phone-error').style.display = 'none';
-            document.querySelector('.btn-submit-invoice').disabled = false;
-        }
-
-        // Load invoices
+        // Load Invoices
         function loadInvoices() {
             const params = new URLSearchParams({
-                customer_name: document.getElementById('filter_customer').value,
-                from_date: document.getElementById('filter_from_date').value,
-                to_date: document.getElementById('filter_to_date').value,
-                status: document.getElementById('filter_status').value,
+                customer_id: $('#filter_customer').val(),
+                from_date: $('#filter_from_date').val(),
+                to_date: $('#filter_to_date').val()
             });
 
             fetch(`{{ route('invoices.data') }}?${params}`)
                 .then(res => res.json())
                 .then(data => {
-                    let html = '';
-                    if (data.length === 0) {
-                        html = '<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">📭</div>Không có dữ liệu</td></tr>';
+                    // Update Summary
+                    $('#total-revenue').text(formatCurrency(data.totalRevenue));
+                    $('#total-count').text(data.totalCount);
+
+                    // Update Table
+                    const tbody = $('#invoices-tbody');
+                    tbody.empty();
+
+                    if (data.invoices.length === 0) {
+                        tbody.append('<tr><td colspan="7" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>');
                     } else {
-                        data.forEach((invoice, index) => {
-                            const statusClass = invoice.status === 'paid' ? 'status-paid' : 'status-pending';
-                            const statusText = invoice.status === 'paid' ? 'Đã xong' : 'Còn nợ';
-                            html += `
+                        data.invoices.forEach((inv, index) => {
+                            tbody.append(`
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${invoice.customer_name}</td>
-                                    <td>${invoice.product_name}</td>
-                                    <td>${invoice.customer_phone}</td>
-                                    <td><span class="${statusClass}">${statusText}</span></td>
+                                    <td>${formatDate(inv.invoice_date)}</td>
+                                    <td>${inv.customer_name}</td>
+                                    <td>${inv.customer_phone || '-'}</td>
+                                    <td>${inv.product_name}</td>
+                                    <td class="fw-bold">${formatCurrency(inv.total_amount)}</td>
                                     <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-sm btn-view" onclick="viewInvoice(${invoice.id})">
-                                                <i class="bi bi-eye"></i> Xem
-                                            </button>
-                                            <button class="btn btn-sm btn-edit" onclick="editInvoice(${invoice.id})">
-                                                <i class="bi bi-pencil"></i> Sửa
-                                            </button>
-                                            <button class="btn btn-sm btn-delete" onclick="deleteInvoice(${invoice.id})">
-                                                <i class="bi bi-trash"></i> Xóa
-                                            </button>
-                                        </div>
+                                        <button class="btn btn-view btn-sm" onclick="viewInvoice(${inv.id})">
+                                            <i class="bi bi-eye"></i> Xem
+                                        </button>
+                                        <button class="btn btn-warning btn-sm text-white" onclick="openEditModal(${inv.id})">
+                                            <i class="bi bi-pencil"></i> Sửa
+                                        </button>
                                     </td>
                                 </tr>
-                            `;
+                            `);
                         });
                     }
-                    document.getElementById('invoices-tbody').innerHTML = html;
                 })
-                .catch(err => {
-                    console.error('Error loading invoices:', err);
-                    document.getElementById('invoices-tbody').innerHTML = '<tr><td colspan="6" class="text-danger">Lỗi tải dữ liệu</td></tr>';
-                });
+                .catch(err => console.error(err));
         }
 
-        // Create invoice
-        document.getElementById('invoice-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
+        // --- Invoice Creation Logic ---
 
-            fetch(`{{ route('invoices.store') }}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                },
-                body: formData
-            })
+        // Create/Update Logic
+        let editingInvoiceId = null;
+
+        function openCreateModal() {
+            editingInvoiceId = null;
+            $('#create-invoice-form')[0].reset();
+            $('#customer_id').val('').trigger('change');
+            $('#invoice_date')[0].valueAsDate = new Date();
+            $('#product-list').empty();
+            $('#grand-total').text('0 đ');
+            $('.modal-title').text('Tạo Hóa Đơn Mới');
+            $('#btn-submit-invoice').text('Tạo Hóa Đơn');
+            addProductRow();
+            createModal.show();
+        }
+
+        function openEditModal(id) {
+            editingInvoiceId = id;
+            $('.modal-title').text('Cập Nhật Hóa Đơn');
+            $('#btn-submit-invoice').text('Lưu Cập Nhật');
+
+            fetch(`{{ url('/invoices') }}/${id}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success) {
-                        alert('Tạo hóa đơn thành công!');
-                        closeSidebar();
-                        loadInvoices();
-                        showInvoiceModal(data.invoice);
+                    $('#customer_id').val(data.customer_id).trigger('change');
+                    $('#invoice_date').val(data.invoice_date.substring(0, 10)); // YYYY-MM-DD
+
+                    $('#product-list').empty();
+
+                    if (data.details && data.details.length > 0) {
+                        data.details.forEach(d => {
+                            addProductRow(d);
+                        });
                     } else {
-                        alert('Có lỗi xảy ra');
+                        addProductRow();
                     }
-                })
-                .catch(err => {
-                    console.error('Error:', err);
-                    alert('Lỗi: ' + err.message);
+                    createModal.show();
                 });
-        });
-
-        // View invoice
-        function viewInvoice(id) {
-            fetch(`{{ route('invoices.show', ':id') }}`.replace(':id', id))
-                .then(res => res.json())
-                .then(invoice => {
-                    showInvoiceModal(invoice);
-                })
-                .catch(err => console.error('Error:', err));
         }
 
-        function showInvoiceModal(invoice) {
-            // Handle both flat and nested invoice objects
-            const customerName = invoice.customer?.name || invoice.customer_name || '';
-            const customerPhone = invoice.customer?.phone || invoice.customer_phone || '';
-            const productName = invoice.details ? invoice.details.map(d => d.product_name).join(', ') : invoice.product_name || '';
-            const invoiceDate = invoice.invoice_date || '';
-            const totalAmount = parseFloat(invoice.total_amount || 0);
-            const paidAmount = parseFloat(invoice.paid_amount || 0);
-            const changeAmount = parseFloat(invoice.change_amount || 0);
-            const debtAmount = parseFloat(invoice.debt_amount || 0);
+        function addProductRow(data = null) {
+            const template = document.getElementById('product-row-template');
+            const clone = template.content.cloneNode(true);
+            const row = $(clone).find('.product-row');
 
-            const detailsHtml = `
-                <div class="invoice-info">
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Mã hóa đơn:</span>
-                        <span class="invoice-info-value">#${invoice.id}</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Tên khách hàng:</span>
-                        <span class="invoice-info-value">${customerName}</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Số điện thoại:</span>
-                        <span class="invoice-info-value">${customerPhone}</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Ngày lập:</span>
-                        <span class="invoice-info-value">${invoiceDate}</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Mặt hàng:</span>
-                        <span class="invoice-info-value">${productName}</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Tổng tiền:</span>
-                        <span class="invoice-info-value" style="color: #e74c3c; font-weight: bold;">${totalAmount.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Khách đã trả:</span>
-                        <span class="invoice-info-value">${paidAmount.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Tiền trả khách:</span>
-                        <span class="invoice-info-value">${changeAmount.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Khách còn nợ:</span>
-                        <span class="invoice-info-value" style="color: #f39c12; font-weight: bold;">${debtAmount.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                    <div class="invoice-info-row">
-                        <span class="invoice-info-label">Trạng thái:</span>
-                        <span class="invoice-info-value">
-                            ${invoice.status === 'paid'
-                    ? '<span class="status-paid">Đã xong</span>'
-                    : '<span class="status-pending">Còn nợ</span>'}
-                        </span>
-                    </div>
-                </div>
-            `;
-            document.getElementById('invoice-details').innerHTML = detailsHtml;
-            window.currentInvoice = invoice;
-            document.getElementById('invoiceModal').classList.add('active');
+            $('#product-list').append(row);
+
+            if (data) {
+                const select = row.find('.product-select');
+
+                // Check if product exists in dropdown
+                if (data.product_id && select.find(`option[value="${data.product_id}"]`).length === 0) {
+                    // Good Solution: Product was deleted from DB but exists in Invoice
+                    // We add a temporary disabled option so the UI isn't broken
+                    select.append(`<option value="${data.product_id}" data-price="${data.price}" disabled selected>${data.product_name} (Đã ngưng kinh doanh)</option>`);
+                } else if (data.product_id) {
+                    // Product exists but might be disabled due to 0 stock
+                    // We must enable it for THIS row so it can be shown
+                    select.find(`option[value="${data.product_id}"]`).prop('disabled', false);
+                }
+
+                select.val(data.product_id || '').trigger('change');
+
+                row.find('.qty-input').val(data.quantity);
+                calculateRowTotal(row.find('.qty-input')[0]);
+            }
+            updateAvailableProducts();
         }
 
-        function closeModal() {
-            document.getElementById('invoiceModal').classList.remove('active');
-        }
+        function updateAvailableProducts() {
+            const selectedProducts = [];
+            $('.product-select').each(function () {
+                const val = $(this).val();
+                if (val) selectedProducts.push(val);
+            });
 
-        // Edit invoice
-        function editInvoice(id) {
-            const newStatus = confirm('Đánh dấu hóa đơn đã xong?') ? 'paid' : 'pending';
-            fetch(`{{ route('invoices.update', ':id') }}`.replace(':id', id), {
-                method: 'PUT',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Cập nhật thành công');
-                        loadInvoices();
-                        closeModal();
+            $('.product-select').each(function () {
+                const currentVal = $(this).val();
+                $(this).find('option').each(function () {
+                    const optVal = $(this).val();
+                    if (!optVal) return;
+
+                    // If it's the current selected value, always keep it enabled so it's visible
+                    if (optVal === currentVal) {
+                        $(this).prop('disabled', false);
+                        $(this).css('color', '');
+                        return;
                     }
-                })
-                .catch(err => console.error('Error:', err));
-        }
 
-        // Delete invoice
-        function deleteInvoice(id) {
-            if (confirm('Bạn chắc chắn muốn xóa hóa đơn này?')) {
-                fetch(`{{ route('invoices.destroy', ':id') }}`.replace(':id', id), {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    }
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Xóa thành công');
-                            loadInvoices();
-                            closeModal();
+                    // If it's selected in another row, disable it
+                    if (selectedProducts.includes(optVal)) {
+                        $(this).prop('disabled', true);
+                        $(this).css('color', '#ccc');
+                    } else {
+                        // Otherwise, follow the data's original state (out of stock = disabled)
+                        // Note: info is static in HTML, but we can check the text or use a data attribute
+                        // For simplicity, we can check if it has the "Hết hàng" indicator in text
+                        const isOutOfStock = $(this).text().includes('(Hết hàng)');
+                        const isMissing = $(this).text().includes('(Đã ngưng kinh doanh)');
+
+                        if (isOutOfStock || isMissing) {
+                            $(this).prop('disabled', true);
+                            $(this).css('color', '#ccc');
+                        } else {
+                            $(this).prop('disabled', false);
+                            $(this).css('color', '');
                         }
-                    })
-                    .catch(err => console.error('Error:', err));
+                    }
+                });
+            });
+        }
+
+        function removeProductRow(btn) {
+            if ($('#product-list .product-row').length > 1) {
+                $(btn).closest('.product-row').remove();
+                calculateGrandTotal();
+                updateAvailableProducts();
+            } else {
+                alert('Phải có ít nhất 1 sản phẩm');
             }
         }
 
-        // Export PDF
-        function exportPdf() {
-            if (!window.currentInvoice) return;
-            const invoice = window.currentInvoice;
-            const element = document.getElementById('invoice-details');
+        window.updateProductPrice = function (select) {
+            const price = $(select).find(':selected').data('price') || 0;
+            const row = $(select).closest('.product-row');
+            row.find('.price-input').val(formatCurrency(price)); // Display formatted
+            row.find('.price-input').data('raw-price', price); // Store raw
+            calculateRowTotal(row.find('.qty-input')[0]);
+            updateAvailableProducts();
+        }
+
+        window.calculateRowTotal = function (input) {
+            const row = $(input).closest('.product-row');
+            const qty = parseInt($(input).val()) || 0;
+            const price = parseFloat(row.find('.price-input').data('raw-price')) || 0;
+
+            const total = qty * price;
+            row.find('.total-input').val(formatCurrency(total));
+            row.find('.total-input').data('raw-total', total);
+
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            $('.total-input').each(function () {
+                total += parseFloat($(this).data('raw-total')) || 0;
+            });
+            $('#grand-total').text(formatCurrency(total));
+        }
+
+        function submitInvoice() {
+            const customerId = $('#customer_id').val();
+            if (!customerId) { alert('Vui lòng chọn khách hàng'); return; }
+
+            const products = [];
+            let isValid = true;
+            $('#product-list .product-row').each(function () {
+                const productId = $(this).find('.product-select').val();
+                if (!productId) { isValid = false; return; }
+
+                products.push({
+                    product_id: productId,
+                    quantity: $(this).find('.qty-input').val(),
+                    price: $(this).find('.price-input').data('raw-price')
+                });
+            });
+
+            if (!isValid) { alert('Vui lòng chọn sản phẩm'); return; }
+
+            const data = {
+                customer_id: customerId,
+                invoice_date: $('#invoice_date').val(),
+                details: products
+            };
+
+            const url = editingInvoiceId ? `{{ url('/invoices') }}/${editingInvoiceId}` : '{{ route("invoices.store") }}';
+            const method = editingInvoiceId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        createModal.hide();
+                        loadInvoices();
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Có lỗi xảy ra');
+                });
+        }
+
+        // --- View ---
+
+        let currentInvoiceId = null;
+
+        function viewInvoice(id) {
+            currentInvoiceId = id;
+            fetch(`{{ url('/invoices') }}/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    let html = `
+                        <div id="invoice-receipt" style="padding: 10px; font-family: Arial, sans-serif;">
+                            <div class="text-center mb-4">
+                                <h3 style="margin-bottom: 5px; font-weight: bold;">HÓA ĐƠN BÁN HÀNG</h3>
+                                <p style="font-size: 14px; color: #555;">Số: HD-${data.id}</p>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <p style="margin-bottom: 5px;"><strong>Khách hàng:</strong> ${data.customer.name}</p>
+                                    <p style="margin-bottom: 5px;"><strong>Điện thoại:</strong> ${data.customer.phone || '-'}</p>
+                                    <p style="margin-bottom: 5px;"><strong>Ngày lập:</strong> ${formatDate(data.invoice_date)}</p>
+                                </div>
+                            </div>
+
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">SL</th>
+                                        <th class="text-end">Đơn giá</th>
+                                        <th class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    data.details.forEach(d => {
+                        html += `
+                            <tr>
+                                <td>${d.product_name}</td>
+                                <td class="text-center">${d.quantity}</td>
+                                <td class="text-end">${formatCurrency(d.price)}</td>
+                                <td class="text-end">${formatCurrency(d.total)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3" class="text-end">TỔNG CỘNG:</th>
+                                        <th class="text-end text-primary" style="font-size: 18px;">${formatCurrency(data.total_amount)}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            
+                            <div class="mt-5 row">
+                                <div class="col-6 text-center">
+                                    <p><strong>Người mua hàng</strong></p>
+                                    <p style="margin-top: 60px;">(Ký, ghi rõ họ tên)</p>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p><strong>Người bán hàng</strong></p>
+                                    <p style="margin-top: 60px;">(Ký, ghi rõ họ tên)</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#detail-content').html(html);
+                    detailModal.show();
+                });
+        }
+
+        function printInvoice() {
+            const content = document.getElementById('invoice-receipt').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>In Hóa Đơn</title>');
+            printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
+            printWindow.document.write('<style>body { padding: 20px; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+
+            // Wait for styles to load
+            printWindow.onload = function () {
+                printWindow.print();
+                printWindow.close();
+            };
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('invoice-receipt');
             const opt = {
-                margin: 10,
-                filename: `hoa_don_${invoice.id}.pdf`,
-                image: { type: 'png', quality: 0.98 },
+                margin: 0.5,
+                filename: `hoa_don_hd${currentInvoiceId}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
             html2pdf().set(opt).from(element).save();
         }
 
-        // Print invoice
-        function printInvoice() {
-            if (!window.currentInvoice) return;
-            const invoice = window.currentInvoice;
-            const element = document.getElementById('invoice-details');
-            const printWindow = window.open('', '', 'height=500,width=800');
-            printWindow.document.write(element.innerHTML);
-            printWindow.document.close();
-            printWindow.print();
-        }
 
-        // Load invoices on page load
-        loadInvoices();
+
     </script>
 </body>
 

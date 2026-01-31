@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\InvoiceDetail;
-use App\Models\Transaction;
+use App\Models\Product;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -19,18 +20,17 @@ class InvoiceController extends Controller
     public function dashboard()
     {
         $customers = Customer::all();
-        return view('dashboard', compact('customers'));
+        $products = Product::all();
+        return view('dashboard', compact('customers', 'products'));
     }
 
     public function getInvoices(Request $request)
     {
-        $query = Invoice::with('customer', 'details');
+        $query = Invoice::with(['customer', 'details']);
 
-        // Filter by customer name
-        if ($request->filled('customer_name')) {
-            $query->whereHas('customer', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->customer_name . '%');
-            });
+        // Filter by customer id
+        if ($request->filled('customer_id')) {
+            $query->where('customer_id', $request->customer_id);
         }
 
         // Filter by date range
@@ -41,131 +41,199 @@ class InvoiceController extends Controller
             $query->where('invoice_date', '<=', $request->to_date);
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
         $invoices = $query->latest()->get();
 
-        return response()->json($invoices->map(function ($invoice) {
-            return [
-                'id' => $invoice->id,
-                'customer_name' => $invoice->customer->name,
-                'customer_phone' => $invoice->customer->phone,
-                'product_name' => $invoice->details->pluck('product_name')->implode(', '),
-                'total_amount' => (float) $invoice->total_amount,
-                'paid_amount' => (float) $invoice->paid_amount,
-                'debt_amount' => (float) $invoice->debt_amount,
-                'status' => $invoice->status,
-                'invoice_date' => $invoice->invoice_date->format('Y-m-d'),
-                'image_path' => $invoice->image_path,
-            ];
-        }));
+        // Calculate totals
+        $totalRevenue = $invoices->sum('total_amount');
+        $totalCount = $invoices->count();
+
+        return response()->json([
+            'invoices' => $invoices->map(function ($invoice) {
+                return [
+                    'id' => $invoice->id,
+                    'customer_name' => $invoice->customer->name,
+                    'customer_phone' => $invoice->customer->phone,
+                    'product_name' => $invoice->details->map(function ($d) {
+                        return $d->product_name . ' (x' . $d->quantity . ')';
+                    })->implode(', '),
+                    'total_amount' => (float) $invoice->total_amount,
+                    'invoice_date' => $invoice->invoice_date->format('Y-m-d'),
+                ];
+            }),
+            'totalRevenue' => $totalRevenue,
+            'totalCount' => $totalCount,
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_id' => 'nullable|integer',
-            'customer_name' => 'required|string',
-            'customer_phone' => 'required|string',
-            'customer_address' => 'nullable|string',
+            'customer_id' => 'required|integer|exists:customers,id',
             'invoice_date' => 'required|date',
-            'product_name' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'paid_amount' => 'required|numeric|min:0',
+            'details' => 'required|array|min:1',
+            'details.*.product_id' => 'required|integer|exists:products,id',
+            'details.*.quantity' => 'required|integer|min:1',
+            'details.*.price' => 'required|numeric|min:0',
+            // Total amount is calculated on backend for security, but allow parsing if needed
         ]);
 
-        // Find or create customer
-        $customer = null;
-        if ($validated['customer_id']) {
-            $customer = Customer::find($validated['customer_id']);
-        } else {
-            $customer = Customer::firstOrCreate(
-                ['phone' => $validated['customer_phone']],
-                [
-                    'name' => $validated['customer_name'],
-                    'address' => $validated['customer_address'] ?? null
-                ]
-            );
+        try {
+            DB::beginTransaction();
+
+            $customer = Customer::findOrFail($validated['customer_id']);
+
+            // Calculate total amount
+            $totalAmount = 0;
+            foreach ($validated['details'] as $item) {
+                $totalAmount += $item['quantity'] * $item['price'];
+            }
+
+            // Create invoice (removed paid_amount, debt, status -> treating as simple record)
+            $invoice = Invoice::create([
+                'customer_id' => $customer->id,
+                'invoice_date' => $validated['invoice_date'],
+                'total_amount' => $totalAmount,
+                'paid_amount' => $totalAmount, // Assuming fully paid as we removed debt tracking
+                'debt_amount' => 0,
+                'change_amount' => 0,
+                'status' => 'paid',
+            ]);
+
+            // Create details and update stock
+            foreach ($validated['details'] as $item) {
+                $product = Product::lockForUpdate()->find($item['product_id']);
+
+                if ($product->quantity < $item['quantity']) {
+                    throw new \Exception("Sản phẩm {$product->name} không đủ số lượng tồn kho (Còn: {$product->quantity})");
+                }
+
+                InvoiceDetail::create([
+                    'invoice_id' => $invoice->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+
+                // Deduct stock
+                $product->quantity -= $item['quantity'];
+                $product->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo hóa đơn thành công!',
+                'invoice' => $invoice
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 400);
         }
-
-        // Calculate amounts
-        $total_amount = $validated['price'];
-        $paid_amount = $validated['paid_amount'];
-        $debt_amount = max(0, $total_amount - $paid_amount);
-        $change_amount = max(0, $paid_amount - $total_amount);
-        $status = $debt_amount == 0 ? 'paid' : 'pending';
-
-        // Create invoice
-        $invoice = Invoice::create([
-            'customer_id' => $customer->id,
-            'invoice_date' => $validated['invoice_date'],
-            'total_amount' => $total_amount,
-            'paid_amount' => $paid_amount,
-            'debt_amount' => $debt_amount,
-            'change_amount' => $change_amount,
-            'status' => $status,
-        ]);
-
-        // Create invoice detail
-        InvoiceDetail::create([
-            'invoice_id' => $invoice->id,
-            'product_name' => $validated['product_name'],
-            'price' => $validated['price'],
-        ]);
-
-        // Create transaction record (income)
-        Transaction::create([
-            'amount' => $total_amount,
-            'description' => 'Thu tiền từ hóa đơn: ' . $validated['product_name'] . ' - Khách: ' . $customer->name,
-            'transaction_date' => $validated['invoice_date'],
-            'type' => 'income',
-            'invoice_id' => $invoice->id,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'invoice' => [
-                'id' => $invoice->id,
-                'customer_name' => $invoice->customer->name,
-                'customer_phone' => $invoice->customer->phone,
-                'product_name' => $invoice->details->pluck('product_name')->implode(', '),
-                'total_amount' => (float) $invoice->total_amount,
-                'paid_amount' => (float) $invoice->paid_amount,
-                'debt_amount' => (float) $invoice->debt_amount,
-                'change_amount' => (float) $invoice->change_amount,
-                'status' => $invoice->status,
-                'invoice_date' => $invoice->invoice_date->format('Y-m-d'),
-            ]
-        ]);
     }
 
     public function show($id)
     {
-        $invoice = Invoice::with('customer', 'details')->findOrFail($id);
-        return response()->json($invoice);
+        $invoice = Invoice::with(['customer', 'details'])->findOrFail($id);
+
+        // Prepare detailed response
+        $data = $invoice->toArray();
+        $data['details'] = $invoice->details->map(function ($detail) {
+            return [
+                'product_id' => $detail->product_id,
+                'product_name' => $detail->product_name,
+                'quantity' => $detail->quantity,
+                'price' => $detail->price,
+                'total' => $detail->quantity * $detail->price
+            ];
+        });
+
+        return response()->json($data);
     }
 
     public function update(Request $request, $id)
     {
-        $invoice = Invoice::findOrFail($id);
-
         $validated = $request->validate([
-            'status' => 'required|in:pending,paid',
+            'customer_id' => 'required|integer|exists:customers,id',
+            'invoice_date' => 'required|date',
+            'details' => 'required|array|min:1',
+            'details.*.product_id' => 'required|integer|exists:products,id',
+            'details.*.quantity' => 'required|integer|min:1',
+            'details.*.price' => 'required|numeric|min:0',
         ]);
 
-        $invoice->update($validated);
+        try {
+            DB::beginTransaction();
 
-        return response()->json(['success' => true, 'invoice' => $invoice]);
-    }
+            $invoice = Invoice::with('details')->findOrFail($id);
 
-    public function destroy($id)
-    {
-        $invoice = Invoice::findOrFail($id);
-        $invoice->delete();
-        return response()->json(['success' => true]);
+            // 1. Restore stock from old details
+            foreach ($invoice->details as $detail) {
+                if ($detail->product_id) {
+                    $product = Product::lockForUpdate()->find($detail->product_id);
+                    if ($product) {
+                        $product->quantity += $detail->quantity;
+                        $product->save();
+                    }
+                }
+                $detail->delete(); // Remove old detail
+            }
+
+            // 2. Calculate new total
+            $totalAmount = 0;
+            foreach ($validated['details'] as $item) {
+                $totalAmount += $item['quantity'] * $item['price'];
+            }
+
+            // 3. Update Invoice
+            $invoice->update([
+                'customer_id' => $validated['customer_id'],
+                'invoice_date' => $validated['invoice_date'],
+                'total_amount' => $totalAmount,
+                'paid_amount' => $totalAmount, // Assuming fully paid
+            ]);
+
+            // 4. Create new details and deduct stock
+            foreach ($validated['details'] as $item) {
+                $product = Product::lockForUpdate()->find($item['product_id']);
+
+                // Allow using stock we just restored (since we did restore first)
+                if ($product->quantity < $item['quantity']) {
+                    throw new \Exception("Sản phẩm {$product->name} không đủ số lượng tồn kho (Còn: {$product->quantity})");
+                }
+
+                InvoiceDetail::create([
+                    'invoice_id' => $invoice->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+
+                $product->quantity -= $item['quantity'];
+                $product->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật hóa đơn thành công!',
+                'invoice' => $invoice
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 400);
+        }
     }
 
     public function getCustomers()
@@ -173,4 +241,6 @@ class InvoiceController extends Controller
         $customers = Customer::all();
         return response()->json($customers);
     }
+
+
 }
