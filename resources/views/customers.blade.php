@@ -380,6 +380,16 @@
                         <i class="bi bi-wallet2"></i> Quản lý thu chi
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('products.index') }}" class="nav-link">
+                        <i class="bi bi-box-seam"></i> Quản lý kho hàng
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('returns.index') }}" class="nav-link">
+                        <i class="bi bi-arrow-return-left"></i> Quản lý trả hàng
+                    </a>
+                </div>
             </div>
 
             <div class="navbar-logout">
@@ -468,8 +478,8 @@
                 </div>
 
                 <div class="form-group-modal">
-                    <label for="customerPhone" class="required">Số điện thoại</label>
-                    <input type="tel" id="customerPhone" name="phone" required placeholder="Nhập số điện thoại">
+                    <label for="customerPhone">Số điện thoại</label>
+                    <input type="tel" id="customerPhone" name="phone" placeholder="Nhập số điện thoại (tùy chọn)">
                     <div id="phoneError"
                         style="color: #dc3545; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;">
                     </div>

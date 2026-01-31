@@ -23,6 +23,11 @@ class TransactionController extends Controller
             $query->where('type', $request->type);
         }
 
+        // Filter by content (description)
+        if ($request->filled('description')) {
+            $query->where('description', 'like', '%' . $request->description . '%');
+        }
+
         // Filter by date range
         if ($request->has('filter') && $request->filter != 'all') {
             $now = Carbon::now();
@@ -54,6 +59,11 @@ class TransactionController extends Controller
         $totalExpense = Transaction::where('type', 'expense');
 
         // Apply same filters to totals
+        if ($request->filled('description')) {
+            $totalIncome->where('description', 'like', '%' . $request->description . '%');
+            $totalExpense->where('description', 'like', '%' . $request->description . '%');
+        }
+
         if ($request->has('type') && $request->type != 'all') {
             if ($request->type == 'income') {
                 $totalExpense->where('id', 0); // No expenses

@@ -29,7 +29,7 @@ class CustomerController extends Controller
         $customerId = $request->query('customer_id');
 
         $query = Customer::where('phone', $phone);
-        
+
         if ($customerId) {
             $query->where('id', '!=', $customerId);
         }
@@ -86,7 +86,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:customers,phone',
+            'phone' => 'nullable|string|max:20|unique:customers,phone',
             'address' => 'nullable|string|max:255',
         ]);
 
@@ -107,7 +107,7 @@ class CustomerController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'phone' => 'sometimes|required|string|max:20|unique:customers,phone,' . $id,
+            'phone' => 'nullable|string|max:20|unique:customers,phone,' . $id,
             'address' => 'nullable|string|max:255',
         ]);
 

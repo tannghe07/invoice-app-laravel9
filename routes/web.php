@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::put('/invoices/{id}', [InvoiceController::class, 'update'])->name('invoices.update');
-    Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+
     Route::get('/customers', [InvoiceController::class, 'getCustomers'])->name('customers.list');
 
     // Customers
@@ -49,4 +49,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/transactions/data', [TransactionController::class, 'getData'])->name('transactions.data');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+
+    // Products (Inventory)
+    Route::get('/products', [App\Http\Controllers\ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/data', [App\Http\Controllers\ProductController::class, 'getData'])->name('products.data');
+    Route::post('/products', [App\Http\Controllers\ProductController::class, 'store'])->name('products.store');
+    Route::put('/products/{id}', [App\Http\Controllers\ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [App\Http\Controllers\ProductController::class, 'destroy'])->name('products.destroy');
+    Route::post('/products/{id}/return', [App\Http\Controllers\ProductController::class, 'returnProduct'])->name('products.return');
+
+    // Product Returns
+    Route::get('/returns', [App\Http\Controllers\ProductReturnController::class, 'index'])->name('returns.index');
+    Route::get('/returns/data', [App\Http\Controllers\ProductReturnController::class, 'getData'])->name('returns.data');
+    Route::post('/returns', [App\Http\Controllers\ProductReturnController::class, 'store'])->name('returns.store');
+    Route::delete('/returns/{id}', [App\Http\Controllers\ProductReturnController::class, 'destroy'])->name('returns.destroy');
 });
