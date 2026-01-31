@@ -384,6 +384,16 @@
                         <i class="bi bi-wallet2"></i> Quản lý thu chi
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('products.index') }}" class="nav-link">
+                        <i class="bi bi-box-seam"></i> Quản lý kho hàng
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('returns.index') }}" class="nav-link">
+                        <i class="bi bi-arrow-return-left"></i> Quản lý trả hàng
+                    </a>
+                </div>
             </div>
 
             <div class="navbar-logout">
@@ -460,6 +470,10 @@
                         <option value="expense">Chi</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="filter_content">Nội dung</label>
+                    <input type="text" class="form-control" id="filter_content" placeholder="Tìm kiếm nội dung...">
+                </div>
                 <button class="btn btn-filter" onclick="loadTransactions()">
                     <i class="bi bi-search"></i> Tìm kiếm
                 </button>
@@ -518,8 +532,8 @@
                         @csrf
                         <div class="mb-3">
                             <label for="amount" class="form-label">Số tiền *</label>
-                            <input type="number" class="form-control" id="amount" name="amount"
-                                placeholder="Nhập số tiền" step="0.01" min="0" required>
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Nhập số tiền"
+                                required oninput="formatNumberInput(this)">
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Nội dung giao dịch *</label>
@@ -554,6 +568,22 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // Format number input
+        function formatNumberInput(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+            input.value = new Intl.NumberFormat('vi-VN').format(value);
+        }
+
+        // Clean number for submission
+        function cleanNumber(value) {
+            if (!value) return 0;
+            return value.toString().replace(/\./g, '');
+        }
+
         // Set today's date as default
         document.getElementById('transaction_date').valueAsDate = new Date();
 
@@ -579,6 +609,7 @@
             const params = new URLSearchParams({
                 filter: document.getElementById('filter_period').value,
                 type: document.getElementById('filter_type').value,
+                description: document.getElementById('filter_content').value,
                 page: page
             });
 
@@ -717,6 +748,9 @@
             e.preventDefault();
 
             const formData = new FormData(this);
+            // Clean amount
+            formData.set('amount', cleanNumber(formData.get('amount')));
+
             const data = Object.fromEntries(formData.entries());
 
             fetch('{{ route("transactions.store") }}', {
