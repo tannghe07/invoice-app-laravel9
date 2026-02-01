@@ -28,6 +28,10 @@ class InvoiceController extends Controller
     {
         $query = Invoice::with(['customer', 'details']);
 
+        if ($request->get('show_trashed') === 'true') {
+            $query->onlyTrashed();
+        }
+
         // Filter by customer id
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->customer_id);
@@ -43,7 +47,9 @@ class InvoiceController extends Controller
 
         $invoices = $query->latest()->get();
 
-        // Calculate totals
+        // Calculate totals - decide if trashed should be included.
+        // If users says "don't affect revenue", we should probably sum over withTrashed() in dashboard 
+        // but for the current filtered list, we sum what's visible.
         $totalRevenue = $invoices->sum('total_amount');
         $totalCount = $invoices->count();
 
@@ -58,6 +64,7 @@ class InvoiceController extends Controller
                     })->implode(', '),
                     'total_amount' => (float) $invoice->total_amount,
                     'invoice_date' => $invoice->invoice_date->format('Y-m-d'),
+                    'is_trashed' => $invoice->trashed(),
                 ];
             }),
             'totalRevenue' => $totalRevenue,
@@ -242,5 +249,25 @@ class InvoiceController extends Controller
         return response()->json($customers);
     }
 
+    public function destroy($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $invoice->delete();
 
+        return response()->json([
+            'success' => true,
+            'message' => 'Hóa đơn đã được đưa vào thùng rác.'
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $invoice = Invoice::onlyTrashed()->findOrFail($id);
+        $invoice->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hóa đơn đã được khôi phục.'
+        ]);
+    }
 }

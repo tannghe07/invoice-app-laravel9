@@ -209,15 +209,48 @@
             color: white;
         }
 
-        .btn-delete {
-            background: #dc3545;
+        .btn-delete:hover {
+            background: #c82333;
+            color: white;
+        }
+
+        .btn-restore {
+            background: #198754;
             border: none;
             color: white;
         }
 
-        .btn-delete:hover {
-            background: #c82333;
+        .btn-restore:hover {
+            background: #157347;
             color: white;
+        }
+
+        .btn-trash-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-trash-toggle.active {
+            background: #dc3545;
+        }
+
+        .trash-header {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
         }
 
         .empty-state {
@@ -408,11 +441,24 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-title">
-                    <i class="bi bi-people"></i> Quản lý Khách Hàng
+                    <i class="bi bi-people" id="page-icon"></i> <span id="page-title-text">Quản lý Khách Hàng</span>
                 </h1>
-                <button class="btn-add" onclick="openAddModal()">
-                    <i class="bi bi-plus-circle"></i> Thêm khách hàng
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn-trash-toggle" id="btn-trash-toggle" onclick="toggleTrash()">
+                        <i class="bi bi-trash"></i> Thùng rác
+                    </button>
+                    <button class="btn-add" id="btn-add-main" onclick="openAddModal()">
+                        <i class="bi bi-plus-circle"></i> Thêm khách hàng
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trash Header Info -->
+            <div class="trash-header" id="trash-info">
+                <div>
+                    <i class="bi bi-info-circle-fill"></i>
+                    <strong>Đang xem Thùng rác.</strong> Các khách hàng ở đây đã được xóa tạm thời.
+                </div>
             </div>
 
             <!-- Filters -->
@@ -480,9 +526,6 @@
                 <div class="form-group-modal">
                     <label for="customerPhone">Số điện thoại</label>
                     <input type="tel" id="customerPhone" name="phone" placeholder="Nhập số điện thoại (tùy chọn)">
-                    <div id="phoneError"
-                        style="color: #dc3545; font-size: 12px; margin-top: 3px; display: none; line-height: 1.2;">
-                    </div>
                 </div>
 
                 <div class="form-group-modal">
@@ -503,46 +546,7 @@
 
     <script>
         let isEditMode = false;
-
-        // Check phone number availability
-        function checkPhoneAvailability() {
-            const phone = document.getElementById('customerPhone').value.trim();
-            const customerId = document.getElementById('customerId').value;
-            const phoneErrorDiv = document.getElementById('phoneError');
-            const submitBtn = document.querySelector('.btn-save');
-
-            if (!phone) {
-                phoneErrorDiv.style.display = 'none';
-                submitBtn.disabled = false;
-                return;
-            }
-
-            const params = new URLSearchParams({
-                phone: phone,
-                customer_id: customerId || ''
-            });
-
-            fetch(`{{ route('customers.check-phone') }}?${params}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.exists) {
-                        phoneErrorDiv.textContent = data.message;
-                        phoneErrorDiv.style.display = 'block';
-                        submitBtn.disabled = true;
-                    } else {
-                        phoneErrorDiv.style.display = 'none';
-                        submitBtn.disabled = false;
-                    }
-                })
-                .catch(err => {
-                    console.error('Error checking phone:', err);
-                    phoneErrorDiv.style.display = 'none';
-                    submitBtn.disabled = false;
-                });
-        }
-
-        // Add event listener for phone input
-        document.getElementById('customerPhone').addEventListener('blur', checkPhoneAvailability);
+        let showTrashed = false;
 
         // Open add modal
         function openAddModal() {
@@ -550,7 +554,6 @@
             document.getElementById('modalTitle').textContent = 'Thêm khách hàng';
             document.getElementById('customerId').value = '';
             document.getElementById('customerForm').reset();
-            document.getElementById('phoneError').style.display = 'none';
             document.querySelector('.btn-save').disabled = false;
             document.getElementById('customerModal').classList.add('active');
         }
@@ -558,7 +561,6 @@
         // Close modal
         function closeModal() {
             document.getElementById('customerModal').classList.remove('active');
-            document.getElementById('phoneError').style.display = 'none';
             document.querySelector('.btn-save').disabled = false;
         }
 
@@ -573,31 +575,52 @@
         function loadCustomers() {
             const name = document.getElementById('filter-name').value;
             const phone = document.getElementById('filter-phone').value;
-            const params = new URLSearchParams({ name, phone });
+            const params = new URLSearchParams({
+                name,
+                phone,
+                show_trashed: showTrashed
+            });
 
-            fetch(`{{ route('customers.data') }}?${params}`)
+            fetch(`{{ route('customers.data') }}?${params}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
                 .then(res => res.json())
                 .then(data => {
                     let html = '';
                     if (data.length === 0) {
-                        html = '<tr><td colspan="6" class="empty-state"><div style="font-size: 40px; margin-bottom: 10px;">👥</div>Không có dữ liệu</td></tr>';
+                        html = `<tr><td colspan="6" class="empty-state"><div style="font-size: 40px; margin-bottom: 10px;">${showTrashed ? '🗑️' : '👥'}</div>Không có dữ liệu ${showTrashed ? 'trong thùng rác' : ''}</td></tr>`;
                     } else {
                         data.forEach((customer, index) => {
+                            let actions = '';
+                            if (customer.is_trashed) {
+                                actions = `
+                                    <button class="btn btn-sm btn-restore" title="Khôi phục" onclick="restoreCustomer(${customer.id})">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
+                                    </button>
+                                `;
+                            } else {
+                                actions = `
+                                    <button class="btn btn-sm btn-edit" title="Sửa" onclick="editCustomer(${customer.id})">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </button>
+                                    <button class="btn btn-sm btn-delete" title="Xóa" onclick="deleteCustomer(${customer.id})">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </button>
+                                `;
+                            }
+
                             html += `
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${customer.name}</td>
-                                    <td>${customer.phone}</td>
+                                    <td class="${customer.is_trashed ? 'text-decoration-line-through text-muted' : ''}">${customer.name}</td>
+                                    <td>${customer.phone || '-'}</td>
                                     <td>${customer.address || '-'}</td>
                                     <td>${customer.invoices_count}</td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn btn-sm btn-edit" onclick="editCustomer(${customer.id})">
-                                                <i class="bi bi-pencil"></i> Sửa
-                                            </button>
-                                            <button class="btn btn-sm btn-delete" onclick="deleteCustomer(${customer.id})">
-                                                <i class="bi bi-trash"></i> Xóa
-                                            </button>
+                                            ${actions}
                                         </div>
                                     </td>
                                 </tr>
@@ -614,7 +637,11 @@
 
         // Edit customer
         function editCustomer(id) {
-            fetch(`{{ route('customers.show', ':id') }}`.replace(':id', id))
+            fetch(`{{ route('customers.show', ':id') }}`.replace(':id', id), {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
                 .then(res => res.json())
                 .then(customer => {
                     isEditMode = true;
@@ -630,17 +657,17 @@
 
         // Delete customer
         function deleteCustomer(id) {
-            if (confirm('Bạn chắc chắn muốn xóa khách hàng này?')) {
-                fetch(`{{ route('customers.destroy', ':id') }}`.replace(':id', id), {
+            if (confirm('Bạn chắc chắn muốn đưa khách hàng này vào thùng rác?')) {
+                fetch(`{{ url('/customers') }}/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
                     }
                 })
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            alert('Xóa thành công');
                             loadCustomers();
                         } else {
                             alert('Lỗi: ' + (data.message || 'Không thể xóa'));
@@ -648,6 +675,50 @@
                     })
                     .catch(err => console.error('Error:', err));
             }
+        }
+
+        function restoreCustomer(id) {
+            fetch(`{{ url('/customers') }}/${id}/restore`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        loadCustomers();
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                });
+        }
+
+        function toggleTrash() {
+            showTrashed = !showTrashed;
+            const btn = document.getElementById('btn-trash-toggle');
+            const trashInfo = document.getElementById('trash-info');
+            const pageIcon = document.getElementById('page-icon');
+            const pageTitleText = document.getElementById('page-title-text');
+            const btnAdd = document.getElementById('btn-add-main');
+
+            if (showTrashed) {
+                btn.innerHTML = '<i class="bi bi-arrow-left"></i> Quay lại';
+                btn.classList.add('active');
+                trashInfo.style.display = 'flex';
+                pageIcon.className = 'bi bi-trash text-danger';
+                pageTitleText.textContent = 'Thùng rác Khách Hàng';
+                btnAdd.style.display = 'none';
+            } else {
+                btn.innerHTML = '<i class="bi bi-trash"></i> Thùng rác';
+                btn.classList.remove('active');
+                trashInfo.style.display = 'none';
+                pageIcon.className = 'bi bi-people text-primary';
+                pageTitleText.textContent = 'Quản lý Khách Hàng';
+                btnAdd.style.display = 'block';
+            }
+            loadCustomers();
         }
 
         // Submit form
@@ -666,6 +737,7 @@
                 method: method,
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
                 },
                 body: formData
             })

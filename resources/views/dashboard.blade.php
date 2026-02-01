@@ -307,6 +307,36 @@
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 38px;
         }
+
+        /* Adjustment for new product row layout */
+        .product-row>div {
+            margin-bottom: 5px;
+        }
+
+        /* Recycle Bin Styles */
+        .page-header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-trash-toggle {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-trash-toggle:hover {
+            background: #5a6268;
+        }
+
+        .btn-trash-toggle.active {
+            background: #dc3545;
+        }
     </style>
 </head>
 
@@ -360,11 +390,16 @@
         <!-- Header -->
         <div class="page-header">
             <h1 class="page-title">
-                <i class="bi bi-file-earmark-text"></i> Quản lý Hóa Đơn
+                <i class="bi bi-file-earmark-text"></i> <span id="main-title">Quản lý Hóa Đơn</span>
             </h1>
-            <button class="btn-create-invoice" onclick="openCreateModal()">
-                <i class="bi bi-plus-circle"></i> Tạo Hóa Đơn Mới
-            </button>
+            <div class="page-header-actions">
+                <button class="btn-trash-toggle" id="trash-toggle" onclick="toggleTrashView()">
+                    <i class="bi bi-trash"></i> Thùng rác
+                </button>
+                <button class="btn-create-invoice" id="btn-create-header" onclick="openCreateModal()">
+                    <i class="bi bi-plus-circle"></i> Tạo Hóa Đơn Mới
+                </button>
+            </div>
         </div>
 
         <!-- Summary -->
@@ -527,9 +562,20 @@
     <!-- Hidden template for product row -->
     <template id="product-row-template">
         <div class="product-row">
-            <div style="flex: 2">
-                <label class="form-label small">Sản phẩm</label>
-                <select class="form-select product-select" onchange="updateProductPrice(this)" required>
+            <div style="flex: 1.5">
+                <label class="form-label small">Mã hàng</label>
+                <select class="form-select sku-select" onchange="syncProductSelects(this, 'sku')" required>
+                    <option value="">-- Mã --</option>
+                    @foreach($products as $product)
+                        <option value="{{ $product->id }}" data-price="{{ $product->price }}" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
+                            {{ $product->code }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="flex: 2.5">
+                <label class="form-label small">Tên sản phẩm</label>
+                <select class="form-select product-select" onchange="syncProductSelects(this, 'name')" required>
                     <option value="">-- Chọn sản phẩm --</option>
                     @foreach($products as $product)
                         <option value="{{ $product->id }}" data-price="{{ $product->price }}" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
@@ -539,15 +585,16 @@
                     @endforeach
                 </select>
             </div>
-            <div style="flex: 1">
+            <div style="flex: 1.2">
                 <label class="form-label small">Đơn giá</label>
-                <input type="text" class="form-control price-input" readonly value="0">
+                <input type="text" class="form-control price-input" value="0"
+                    oninput="formatPriceInput(this); calculateRowTotal(this)">
             </div>
-            <div style="flex: 1">
-                <label class="form-label small">Số lượng</label>
+            <div style="flex: 0.8">
+                <label class="form-label small">SL</label>
                 <input type="number" class="form-control qty-input" min="1" value="1" oninput="calculateRowTotal(this)">
             </div>
-            <div style="flex: 1">
+            <div style="flex: 1.2">
                 <label class="form-label small">Thành tiền</label>
                 <input type="text" class="form-control total-input" readonly value="0">
             </div>
@@ -589,15 +636,34 @@
                 $('#customer_phone').val(phone || '');
             });
 
+            // Handle Enter key to add new product row
+            $(document).on('keydown', function (e) {
+                // Only if the Create/Edit modal is open
+                if ($('#createInvoiceModal').hasClass('show')) {
+                    // Avoid adding row if Enter is pressed on buttons or textarea (if any)
+                    if (e.key === 'Enter' && !$(e.target).is('button, a')) {
+                        e.preventDefault();
+                        addProductRow();
+                        // Focus the SKU select of the newly added row
+                        setTimeout(() => {
+                            $('#product-list .product-row:last .sku-select').focus();
+                        }, 50);
+                    }
+                }
+            });
+
             loadInvoices();
         });
+
+        let isTrashView = false;
 
         // Load Invoices
         function loadInvoices() {
             const params = new URLSearchParams({
                 customer_id: $('#filter_customer').val(),
                 from_date: $('#filter_from_date').val(),
-                to_date: $('#filter_to_date').val()
+                to_date: $('#filter_to_date').val(),
+                show_trashed: isTrashView
             });
 
             fetch(`{{ route('invoices.data') }}?${params}`)
@@ -615,6 +681,27 @@
                         tbody.append('<tr><td colspan="7" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>');
                     } else {
                         data.invoices.forEach((inv, index) => {
+                            let actions = '';
+                            if (inv.is_trashed) {
+                                actions = `
+                                    <button class="btn btn-success btn-sm text-white" onclick="restoreInvoice(${inv.id})">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
+                                    </button>
+                                `;
+                            } else {
+                                actions = `
+                                    <button class="btn btn-view btn-sm" onclick="viewInvoice(${inv.id})">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </button>
+                                    <button class="btn btn-warning btn-sm text-white" onclick="openEditModal(${inv.id})">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${inv.id})">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </button>
+                                `;
+                            }
+
                             tbody.append(`
                                 <tr>
                                     <td>${index + 1}</td>
@@ -623,20 +710,61 @@
                                     <td>${inv.customer_phone || '-'}</td>
                                     <td>${inv.product_name}</td>
                                     <td class="fw-bold">${formatCurrency(inv.total_amount)}</td>
-                                    <td>
-                                        <button class="btn btn-view btn-sm" onclick="viewInvoice(${inv.id})">
-                                            <i class="bi bi-eye"></i> Xem
-                                        </button>
-                                        <button class="btn btn-warning btn-sm text-white" onclick="openEditModal(${inv.id})">
-                                            <i class="bi bi-pencil"></i> Sửa
-                                        </button>
-                                    </td>
+                                    <td>${actions}</td>
                                 </tr>
                             `);
                         });
                     }
                 })
                 .catch(err => console.error(err));
+        }
+
+        function toggleTrashView() {
+            isTrashView = !isTrashView;
+            if (isTrashView) {
+                $('#trash-toggle').addClass('active').html('<i class="bi bi-arrow-left"></i> Quay lại');
+                $('#main-title').text('Thùng rác Hóa Đơn');
+                $('#btn-create-header').hide();
+                $('.summary-icon.revenue').parent().find('h3').text('Doanh thu (Đã xóa)');
+                $('.summary-icon.count').parent().find('h3').text('Hóa đơn (Đã xóa)');
+            } else {
+                $('#trash-toggle').removeClass('active').html('<i class="bi bi-trash"></i> Thùng rác');
+                $('#main-title').text('Quản lý Hóa Đơn');
+                $('#btn-create-header').show();
+                $('.summary-icon.revenue').parent().find('h3').text('Tổng Doanh Thu');
+                $('.summary-icon.count').parent().find('h3').text('Tổng Số Hóa Đơn');
+            }
+            loadInvoices();
+        }
+
+        function deleteInvoice(id) {
+            if (!confirm('Bạn có chắc chắn muốn đưa hóa đơn này vào thùng rác?')) return;
+
+            fetch(`{{ url('/invoices') }}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    loadInvoices();
+                });
+        }
+
+        function restoreInvoice(id) {
+            fetch(`{{ url('/invoices') }}/${id}/restore`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    loadInvoices();
+                });
         }
 
         // --- Invoice Creation Logic ---
@@ -705,77 +833,56 @@
                 select.val(data.product_id || '').trigger('change');
 
                 row.find('.qty-input').val(data.quantity);
+
+                // Set value and trigger manual format to handle potential '.00' from DB decimals
+                const priceInput = row.find('.price-input')[0];
+                priceInput.value = Math.floor(parseFloat(data.price) || 0);
+                formatPriceInput(priceInput);
+
+                // Sync the SKU select as well
+                row.find('.sku-select').val(data.product_id || '');
+
                 calculateRowTotal(row.find('.qty-input')[0]);
             }
-            updateAvailableProducts();
         }
 
-        function updateAvailableProducts() {
-            const selectedProducts = [];
-            $('.product-select').each(function () {
-                const val = $(this).val();
-                if (val) selectedProducts.push(val);
-            });
-
-            $('.product-select').each(function () {
-                const currentVal = $(this).val();
-                $(this).find('option').each(function () {
-                    const optVal = $(this).val();
-                    if (!optVal) return;
-
-                    // If it's the current selected value, always keep it enabled so it's visible
-                    if (optVal === currentVal) {
-                        $(this).prop('disabled', false);
-                        $(this).css('color', '');
-                        return;
-                    }
-
-                    // If it's selected in another row, disable it
-                    if (selectedProducts.includes(optVal)) {
-                        $(this).prop('disabled', true);
-                        $(this).css('color', '#ccc');
-                    } else {
-                        // Otherwise, follow the data's original state (out of stock = disabled)
-                        // Note: info is static in HTML, but we can check the text or use a data attribute
-                        // For simplicity, we can check if it has the "Hết hàng" indicator in text
-                        const isOutOfStock = $(this).text().includes('(Hết hàng)');
-                        const isMissing = $(this).text().includes('(Đã ngưng kinh doanh)');
-
-                        if (isOutOfStock || isMissing) {
-                            $(this).prop('disabled', true);
-                            $(this).css('color', '#ccc');
-                        } else {
-                            $(this).prop('disabled', false);
-                            $(this).css('color', '');
-                        }
-                    }
-                });
-            });
+        window.formatPriceInput = function (input) {
+            // Remove any dots/separators added by formatting
+            let value = input.value.toString().replace(/\D/g, '');
+            if (value === '') value = '0';
+            const numValue = parseInt(value);
+            input.value = new Intl.NumberFormat('vi-VN').format(numValue);
+            $(input).data('raw-value', numValue);
         }
 
         function removeProductRow(btn) {
             if ($('#product-list .product-row').length > 1) {
                 $(btn).closest('.product-row').remove();
                 calculateGrandTotal();
-                updateAvailableProducts();
             } else {
                 alert('Phải có ít nhất 1 sản phẩm');
             }
         }
 
-        window.updateProductPrice = function (select) {
-            const price = $(select).find(':selected').data('price') || 0;
+        window.syncProductSelects = function (select, type) {
             const row = $(select).closest('.product-row');
-            row.find('.price-input').val(formatCurrency(price)); // Display formatted
-            row.find('.price-input').data('raw-price', price); // Store raw
+            const val = $(select).val();
+
+            if (type === 'sku') {
+                row.find('.product-select').val(val);
+            } else {
+                row.find('.sku-select').val(val);
+            }
+
+            // Note: Per user request, price is NOT auto-filled.
+            // But we still recalculate the row total
             calculateRowTotal(row.find('.qty-input')[0]);
-            updateAvailableProducts();
         }
 
         window.calculateRowTotal = function (input) {
             const row = $(input).closest('.product-row');
-            const qty = parseInt($(input).val()) || 0;
-            const price = parseFloat(row.find('.price-input').data('raw-price')) || 0;
+            const qty = parseInt(row.find('.qty-input').val()) || 0;
+            const price = parseFloat(row.find('.price-input').data('raw-value')) || 0;
 
             const total = qty * price;
             row.find('.total-input').val(formatCurrency(total));
@@ -805,7 +912,7 @@
                 products.push({
                     product_id: productId,
                     quantity: $(this).find('.qty-input').val(),
-                    price: $(this).find('.price-input').data('raw-price')
+                    price: $(this).find('.price-input').data('raw-value') || 0
                 });
             });
 
