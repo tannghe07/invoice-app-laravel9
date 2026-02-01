@@ -143,7 +143,7 @@
 
         .filter-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
             align-items: flex-end;
         }
@@ -463,6 +463,14 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="filter_from">Từ ngày</label>
+                    <input type="date" class="form-control" id="filter_from">
+                </div>
+                <div class="form-group">
+                    <label for="filter_to">Đến ngày</label>
+                    <input type="date" class="form-control" id="filter_to">
+                </div>
+                <div class="form-group">
                     <label for="filter_type">Loại giao dịch</label>
                     <select class="form-select" id="filter_type">
                         <option value="all">Tất cả</option>
@@ -590,6 +598,42 @@
         let chart = null;
         let currentPage = 1;
 
+        // Clear custom dates when selecting period
+        document.getElementById('filter_period').addEventListener('change', function() {
+            if (this.value !== 'all') {
+                document.getElementById('filter_from').value = '';
+                document.getElementById('filter_to').value = '';
+            }
+            loadTransactions();
+        });
+
+        // Reset period when entering custom dates
+        document.getElementById('filter_from').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('filter_period').value = 'all';
+            }
+            loadTransactions();
+        });
+
+        document.getElementById('filter_to').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('filter_period').value = 'all';
+            }
+            loadTransactions();
+        });
+
+        // Other filter listeners
+        document.getElementById('filter_type').addEventListener('change', loadTransactions);
+        document.getElementById('filter_content').addEventListener('input', debounce(loadTransactions, 500));
+
+        function debounce(func, timeout = 300) {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+
         // Format currency
         function formatCurrency(amount) {
             return new Intl.NumberFormat('vi-VN', {
@@ -608,6 +652,8 @@
         function loadTransactions(page = 1) {
             const params = new URLSearchParams({
                 filter: document.getElementById('filter_period').value,
+                from_date: document.getElementById('filter_from').value,
+                to_date: document.getElementById('filter_to').value,
                 type: document.getElementById('filter_type').value,
                 description: document.getElementById('filter_content').value,
                 page: page

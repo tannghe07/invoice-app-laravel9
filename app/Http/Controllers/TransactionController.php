@@ -29,6 +29,14 @@ class TransactionController extends Controller
         }
 
         // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('transaction_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('transaction_date', '<=', $request->to_date);
+        }
+
+        // Filter by predefined periods
         if ($request->has('filter') && $request->filter != 'all') {
             $now = Carbon::now();
 
@@ -70,6 +78,15 @@ class TransactionController extends Controller
             } else {
                 $totalIncome->where('id', 0); // No income
             }
+        }
+
+        if ($request->filled('from_date')) {
+            $totalIncome->whereDate('transaction_date', '>=', $request->from_date);
+            $totalExpense->whereDate('transaction_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $totalIncome->whereDate('transaction_date', '<=', $request->to_date);
+            $totalExpense->whereDate('transaction_date', '<=', $request->to_date);
         }
 
         if ($request->has('filter') && $request->filter != 'all') {
