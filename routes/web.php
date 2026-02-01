@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::put('/invoices/{id}', [InvoiceController::class, 'update'])->name('invoices.update');
+    Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::post('/invoices/{id}/restore', [InvoiceController::class, 'restore'])->name('invoices.restore');
 
     Route::get('/customers', [InvoiceController::class, 'getCustomers'])->name('customers.list');
 
@@ -43,11 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
 
     // Transactions
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/data', [TransactionController::class, 'getData'])->name('transactions.data');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
+    Route::put('/transactions/{id}', [TransactionController::class, 'update'])->name('transactions.update');
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 
     // Products (Inventory)
@@ -62,5 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/returns', [App\Http\Controllers\ProductReturnController::class, 'index'])->name('returns.index');
     Route::get('/returns/data', [App\Http\Controllers\ProductReturnController::class, 'getData'])->name('returns.data');
     Route::post('/returns', [App\Http\Controllers\ProductReturnController::class, 'store'])->name('returns.store');
+    Route::get('/returns/{id}', [App\Http\Controllers\ProductReturnController::class, 'show'])->name('returns.show');
+    Route::put('/returns/{id}', [App\Http\Controllers\ProductReturnController::class, 'update'])->name('returns.update');
     Route::delete('/returns/{id}', [App\Http\Controllers\ProductReturnController::class, 'destroy'])->name('returns.destroy');
 });

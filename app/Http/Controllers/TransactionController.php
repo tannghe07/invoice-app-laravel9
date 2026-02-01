@@ -132,6 +132,43 @@ class TransactionController extends Controller
         ]);
     }
 
+    public function show($id)
+    {
+        $transaction = Transaction::findOrFail($id);
+        return response()->json($transaction);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'description' => 'required|string|max:1000',
+            'transaction_date' => 'required|date',
+            'type' => 'required|in:income,expense',
+        ]);
+
+        $transaction = Transaction::findOrFail($id);
+
+        if ($transaction->invoice_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể sửa giao dịch liên kết với hóa đơn!'
+            ], 400);
+        }
+
+        $transaction->update([
+            'amount' => $request->amount,
+            'description' => $request->description,
+            'transaction_date' => $request->transaction_date,
+            'type' => $request->type,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Giao dịch đã được cập nhật thành công!',
+            'transaction' => $transaction
+        ]);
+    }
     public function destroy($id)
     {
         $transaction = Transaction::findOrFail($id);
