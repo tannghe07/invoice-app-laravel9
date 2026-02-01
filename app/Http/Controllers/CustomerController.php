@@ -49,6 +49,10 @@ class CustomerController extends Controller
     {
         $query = Customer::query();
 
+        if ($request->get('show_trashed') === 'true') {
+            $query->onlyTrashed();
+        }
+
         if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
@@ -66,6 +70,7 @@ class CustomerController extends Controller
                 'phone' => $customer->phone,
                 'address' => $customer->address,
                 'invoices_count' => $customer->invoices_count,
+                'is_trashed' => $customer->trashed(),
             ];
         }));
     }
@@ -86,7 +91,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20|unique:customers,phone',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
         ]);
 
@@ -107,7 +112,7 @@ class CustomerController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'phone' => 'nullable|string|max:20|unique:customers,phone,' . $id,
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
         ]);
 
@@ -125,17 +130,22 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         $customer = Customer::findOrFail($id);
-
-        // Check if customer has invoices
-        if ($customer->invoices()->count() > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể xóa khách hàng đã có hóa đơn'
-            ], 400);
-        }
-
         $customer->delete();
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Khách hàng đã được đưa vào thùng rác.'
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $customer = Customer::onlyTrashed()->findOrFail($id);
+        $customer->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Khách hàng đã được khôi phục.'
+        ]);
     }
 }

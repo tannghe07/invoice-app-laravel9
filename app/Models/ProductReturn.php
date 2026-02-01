@@ -11,16 +11,19 @@ class ProductReturn extends Model
 
     protected $fillable = [
         'customer_id',
-        'product_name',
-        'quantity',
         'return_date',
         'reason',
-        'refund_amount',
+        'total_refund_amount',
         'status'
     ];
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Customer::class)->withTrashed();
+    }
+
+    public function details()
+    {
+        return $this->hasMany(ProductReturnDetail::class);
     }
 }

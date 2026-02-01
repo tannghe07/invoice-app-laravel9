@@ -413,7 +413,7 @@
             <h1 class="page-title">
                 <i class="bi bi-wallet2"></i> Quản lý Thu Chi
             </h1>
-            <button class="btn-add-transaction" data-bs-toggle="modal" data-bs-target="#transactionModal">
+            <button class="btn-add-transaction" onclick="openCreateModal()">
                 <i class="bi bi-plus-circle"></i> Tạo giao dịch mới
             </button>
         </div>
@@ -456,10 +456,10 @@
                 <div class="form-group">
                     <label for="filter_period">Thời gian</label>
                     <select class="form-select" id="filter_period">
-                        <option value="all">Tất cả</option>
+                        <option value="all" selected>Tất cả</option>
                         <option value="day">Hôm nay</option>
                         <option value="week">Tuần này</option>
-                        <option value="month" selected>Tháng này</option>
+                        <option value="month">Tháng này</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -522,7 +522,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
+                    <h5 class="modal-title" id="transactionModalLabel">
                         <i class="bi bi-plus-circle"></i> Tạo Giao Dịch
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -554,7 +554,7 @@
                             </select>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="btn-save-transaction">
                                 <i class="bi bi-check-circle"></i> Tạo Giao Dịch
                             </button>
                         </div>
@@ -570,12 +570,12 @@
     <script>
         // Format number input
         function formatNumberInput(input) {
-            let value = input.value.replace(/\D/g, '');
+            let value = input.value.toString().replace(/\D/g, '');
             if (value === '') {
                 input.value = '';
                 return;
             }
-            input.value = new Intl.NumberFormat('vi-VN').format(value);
+            input.value = new Intl.NumberFormat('vi-VN').format(parseInt(value));
         }
 
         // Clean number for submission
@@ -648,6 +648,9 @@
                                     </td>
                                     <td>
                                         ${!transaction.invoice_id ? `
+                                            <button class="btn btn-warning btn-sm text-white" onclick="openEditModal(${transaction.id})">
+                                                <i class="bi bi-pencil"></i> Sửa
+                                            </button>
                                             <button class="btn btn-delete btn-sm" onclick="deleteTransaction(${transaction.id})">
                                                 <i class="bi bi-trash"></i> Xóa
                                             </button>
@@ -743,7 +746,42 @@
             document.getElementById('pagination-container').innerHTML = html;
         }
 
-        // Create transaction
+        // Create/Update transaction
+        let editingTransactionId = null;
+        const transactionModal = new bootstrap.Modal(document.getElementById('transactionModal'));
+
+        function openCreateModal() {
+            editingTransactionId = null;
+            document.getElementById('transactionModalLabel').innerHTML = '<i class="bi bi-plus-circle"></i> Tạo Giao Dịch';
+            document.getElementById('btn-save-transaction').innerHTML = '<i class="bi bi-check-circle"></i> Tạo Giao Dịch';
+            document.getElementById('transaction-form').reset();
+            document.getElementById('transaction_date').valueAsDate = new Date();
+            transactionModal.show();
+        }
+
+        function openEditModal(id) {
+            editingTransactionId = id;
+            document.getElementById('transactionModalLabel').innerHTML = '<i class="bi bi-pencil"></i> Sửa Giao Dịch';
+            document.getElementById('btn-save-transaction').innerHTML = '<i class="bi bi-check-circle"></i> Cập Nhật';
+
+            fetch(`{{ url('/transactions') }}/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    const amountInput = document.getElementById('amount');
+                    amountInput.value = Math.floor(parseFloat(data.amount) || 0);
+                    formatNumberInput(amountInput);
+
+                    document.getElementById('description').value = data.description;
+                    document.getElementById('transaction_date').value = data.transaction_date.substring(0, 10);
+                    document.getElementById('type').value = data.type;
+                    transactionModal.show();
+                })
+                .catch(err => {
+                    console.error('Error loading transaction details:', err);
+                    alert('Không thể tải thông tin giao dịch');
+                });
+        }
+
         document.getElementById('transaction-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -753,8 +791,14 @@
 
             const data = Object.fromEntries(formData.entries());
 
-            fetch('{{ route("transactions.store") }}', {
-                method: 'POST',
+            const url = editingTransactionId
+                ? `{{ url('/transactions') }}/${editingTransactionId}`
+                : '{{ route("transactions.store") }}';
+
+            const method = editingTransactionId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
@@ -765,15 +809,10 @@
                 .then(data => {
                     if (data.success) {
                         // Close modal
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('transactionModal'));
-                        modal.hide();
-
-                        // Reset form
-                        document.getElementById('transaction-form').reset();
-                        document.getElementById('transaction_date').valueAsDate = new Date();
+                        transactionModal.hide();
 
                         // Reload transactions
-                        loadTransactions();
+                        loadTransactions(currentPage);
 
                         // Show success message
                         alert(data.message);
@@ -782,8 +821,8 @@
                     }
                 })
                 .catch(err => {
-                    console.error('Error creating transaction:', err);
-                    alert('Có lỗi xảy ra khi tạo giao dịch');
+                    console.error('Error saving transaction:', err);
+                    alert('Có lỗi xảy ra khi lưu giao dịch');
                 });
         });
 
