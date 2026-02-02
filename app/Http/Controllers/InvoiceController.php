@@ -110,10 +110,6 @@ class InvoiceController extends Controller
             foreach ($validated['details'] as $item) {
                 $product = Product::lockForUpdate()->find($item['product_id']);
 
-                if ($product->quantity < $item['quantity']) {
-                    throw new \Exception("Sản phẩm {$product->name} không đủ số lượng tồn kho (Còn: {$product->quantity})");
-                }
-
                 InvoiceDetail::create([
                     'invoice_id' => $invoice->id,
                     'product_id' => $product->id,
@@ -146,13 +142,14 @@ class InvoiceController extends Controller
 
     public function show($id)
     {
-        $invoice = Invoice::with(['customer', 'details'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'details.product'])->findOrFail($id);
 
         // Prepare detailed response
         $data = $invoice->toArray();
         $data['details'] = $invoice->details->map(function ($detail) {
             return [
                 'product_id' => $detail->product_id,
+                'product_code' => $detail->product ? $detail->product->code : '-',
                 'product_name' => $detail->product_name,
                 'quantity' => $detail->quantity,
                 'price' => $detail->price,
@@ -208,11 +205,6 @@ class InvoiceController extends Controller
             // 4. Create new details and deduct stock
             foreach ($validated['details'] as $item) {
                 $product = Product::lockForUpdate()->find($item['product_id']);
-
-                // Allow using stock we just restored (since we did restore first)
-                if ($product->quantity < $item['quantity']) {
-                    throw new \Exception("Sản phẩm {$product->name} không đủ số lượng tồn kho (Còn: {$product->quantity})");
-                }
 
                 InvoiceDetail::create([
                     'invoice_id' => $invoice->id,
