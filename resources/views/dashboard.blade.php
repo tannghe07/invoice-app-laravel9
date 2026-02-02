@@ -509,20 +509,83 @@
                             <input type="date" class="form-control" id="invoice_date" name="invoice_date" required>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label d-flex justify-content-between align-items-center">
-                                <span>Danh sách sản phẩm</span>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProductRow()">
-                                    <i class="bi bi-plus"></i> Thêm sản phẩm
-                                </button>
-                            </label>
-                            <div id="product-list">
-                                <!-- Product Rows -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6>Thêm sản phẩm mới</h6>
+                                <div class="product-row" id="search-section">
+                                    <div style="flex: 1.5">
+                                        <label class="form-label small">Mã hàng</label>
+                                        <select class="form-select sku-select" id="search_sku"
+                                            onchange="syncSearchSelects(this, 'sku')">
+                                            <option value="">-- Mã --</option>
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}" data-price="{{ $product->price }}"
+                                                    data-code="{{ $product->code }}" data-name="{{ $product->name }}">
+                                                    {{ $product->code }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div style="flex: 2.5">
+                                        <label class="form-label small">Tên sản phẩm</label>
+                                        <select class="form-select product-select" id="search_name"
+                                            onchange="syncSearchSelects(this, 'name')">
+                                            <option value="">-- Chọn sản phẩm --</option>
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}" data-price="{{ $product->price }}"
+                                                    data-code="{{ $product->code }}" data-name="{{ $product->name }}">
+                                                    {{ $product->name }} (Tồn: {{ $product->quantity }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div style="flex: 0.8">
+                                        <label class="form-label small">SL</label>
+                                        <input type="number" class="form-control qty-input" id="search_qty" min="1"
+                                            value="1">
+                                    </div>
+                                    <div style="flex: 1.2">
+                                        <label class="form-label small">Đơn giá</label>
+                                        <input type="text" class="form-control price-input" id="search_price" value="0"
+                                            oninput="formatPriceInput(this)">
+                                    </div>
+                                    <div style="flex: 0.5">
+                                        <label class="form-label small">&nbsp;</label>
+                                        <button type="button" class="btn btn-primary w-100" onclick="addItemToInvoice()"
+                                            title="Nhấn Enter để thêm">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3 text-end">
-                            <h4>Tổng Tiền: <span id="grand-total" class="text-primary">0 đ</span></h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 50px;">STT</th>
+                                        <th style="width: 120px;">Mã SP</th>
+                                        <th>Tên Sản Phẩm</th>
+                                        <th class="text-center" style="width: 80px;">SL</th>
+                                        <th class="text-end" style="width: 130px;">Đơn giá</th>
+                                        <th class="text-end" style="width: 150px;">Thành tiền</th>
+                                        <th class="text-center" style="width: 50px;">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="selected-items-tbody">
+                                    <!-- Rows added dynamically -->
+                                </tbody>
+                                <tfoot class="table-light fw-bold" id="selected-items-tfoot">
+                                    <tr>
+                                        <td colspan="3" class="text-end">Tổng số lượng:</td>
+                                        <td class="text-center" id="footer-total-qty">0</td>
+                                        <td class="text-end">TỔNG TIỀN:</td>
+                                        <td class="text-end text-primary" id="footer-grand-total">0 đ</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </form>
                 </div>
@@ -559,50 +622,7 @@
         </div>
     </div>
 
-    <!-- Hidden template for product row -->
-    <template id="product-row-template">
-        <div class="product-row">
-            <div style="flex: 1.5">
-                <label class="form-label small">Mã hàng</label>
-                <select class="form-select sku-select" onchange="syncProductSelects(this, 'sku')" required>
-                    <option value="">-- Mã --</option>
-                    @foreach($products as $product)
-                        <option value="{{ $product->id }}" data-price="{{ $product->price }}" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
-                            {{ $product->code }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div style="flex: 2.5">
-                <label class="form-label small">Tên sản phẩm</label>
-                <select class="form-select product-select" onchange="syncProductSelects(this, 'name')" required>
-                    <option value="">-- Chọn sản phẩm --</option>
-                    @foreach($products as $product)
-                        <option value="{{ $product->id }}" data-price="{{ $product->price }}" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
-                            {{ $product->name }}
-                            ({{ $product->quantity > 0 ? 'Tồn: ' . $product->quantity : 'Hết hàng' }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div style="flex: 1.2">
-                <label class="form-label small">Đơn giá</label>
-                <input type="text" class="form-control price-input" value="0"
-                    oninput="formatPriceInput(this); calculateRowTotal(this)">
-            </div>
-            <div style="flex: 0.8">
-                <label class="form-label small">SL</label>
-                <input type="number" class="form-control qty-input" min="1" value="1" oninput="calculateRowTotal(this)">
-            </div>
-            <div style="flex: 1.2">
-                <label class="form-label small">Thành tiền</label>
-                <input type="text" class="form-control total-input" readonly value="0">
-            </div>
-            <button type="button" class="btn-remove-item" onclick="removeProductRow(this)">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    </template>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -636,18 +656,26 @@
                 $('#customer_phone').val(phone || '');
             });
 
-            // Handle Enter key to add new product row
-            $(document).on('keydown', function (e) {
-                // Only if the Create/Edit modal is open
-                if ($('#createInvoiceModal').hasClass('show')) {
-                    // Avoid adding row if Enter is pressed on buttons or textarea (if any)
-                    if (e.key === 'Enter' && !$(e.target).is('button, a')) {
+            // Handle keydown in search section
+            $(document).on('keydown', '#search-section input, #search-section select', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addItemToInvoice();
+                }
+
+                if (e.key === 'ArrowRight') {
+                    const focusables = $('#search-section').find('.sku-select, .product-select, .qty-input, .price-input');
+                    const index = focusables.index(this);
+                    if (index < focusables.length - 1) {
                         e.preventDefault();
-                        addProductRow();
-                        // Focus the SKU select of the newly added row
-                        setTimeout(() => {
-                            $('#product-list .product-row:last .sku-select').focus();
-                        }, 50);
+                        focusables.eq(index + 1).focus();
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    const focusables = $('#search-section').find('.sku-select, .product-select, .qty-input, .price-input');
+                    const index = focusables.index(this);
+                    if (index > 0) {
+                        e.preventDefault();
+                        focusables.eq(index - 1).focus();
                     }
                 }
             });
@@ -768,25 +796,25 @@
         }
 
         // --- Invoice Creation Logic ---
-
-        // Create/Update Logic
         let editingInvoiceId = null;
+        let selectedItems = [];
 
         function openCreateModal() {
             editingInvoiceId = null;
+            selectedItems = [];
             $('#create-invoice-form')[0].reset();
             $('#customer_id').val('').trigger('change');
             $('#invoice_date')[0].valueAsDate = new Date();
-            $('#product-list').empty();
-            $('#grand-total').text('0 đ');
+            resetSearchSection();
+            renderSelectedItems();
             $('.modal-title').text('Tạo Hóa Đơn Mới');
             $('#btn-submit-invoice').text('Tạo Hóa Đơn');
-            addProductRow();
             createModal.show();
         }
 
         function openEditModal(id) {
             editingInvoiceId = id;
+            selectedItems = [];
             $('.modal-title').text('Cập Nhật Hóa Đơn');
             $('#btn-submit-invoice').text('Lưu Cập Nhật');
 
@@ -794,60 +822,144 @@
                 .then(res => res.json())
                 .then(data => {
                     $('#customer_id').val(data.customer_id).trigger('change');
-                    $('#invoice_date').val(data.invoice_date.substring(0, 10)); // YYYY-MM-DD
+                    $('#invoice_date').val(data.invoice_date.substring(0, 10));
 
-                    $('#product-list').empty();
+                    selectedItems = data.details.map(d => ({
+                        product_id: d.product_id,
+                        product_code: d.product_code || '',
+                        product_name: d.product_name,
+                        quantity: parseInt(d.quantity),
+                        price: parseFloat(d.price)
+                    }));
 
-                    if (data.details && data.details.length > 0) {
-                        data.details.forEach(d => {
-                            addProductRow(d);
-                        });
-                    } else {
-                        addProductRow();
-                    }
+                    resetSearchSection();
+                    renderSelectedItems();
                     createModal.show();
                 });
         }
 
-        function addProductRow(data = null) {
-            const template = document.getElementById('product-row-template');
-            const clone = template.content.cloneNode(true);
-            const row = $(clone).find('.product-row');
+        function resetSearchSection() {
+            $('#search_sku').val('').trigger('change');
+            $('#search_name').val('').trigger('change');
+            $('#search_qty').val(1);
+            $('#search_price').val(0).data('raw-value', 0);
+        }
 
-            $('#product-list').append(row);
+        window.syncSearchSelects = function (select, type) {
+            const val = $(select).val();
+            const option = $(select).find(':selected');
 
-            if (data) {
-                const select = row.find('.product-select');
-
-                // Check if product exists in dropdown
-                if (data.product_id && select.find(`option[value="${data.product_id}"]`).length === 0) {
-                    // Good Solution: Product was deleted from DB but exists in Invoice
-                    // We add a temporary disabled option so the UI isn't broken
-                    select.append(`<option value="${data.product_id}" data-price="${data.price}" disabled selected>${data.product_name} (Đã ngưng kinh doanh)</option>`);
-                } else if (data.product_id) {
-                    // Product exists but might be disabled due to 0 stock
-                    // We must enable it for THIS row so it can be shown
-                    select.find(`option[value="${data.product_id}"]`).prop('disabled', false);
-                }
-
-                select.val(data.product_id || '').trigger('change');
-
-                row.find('.qty-input').val(data.quantity);
-
-                // Set value and trigger manual format to handle potential '.00' from DB decimals
-                const priceInput = row.find('.price-input')[0];
-                priceInput.value = Math.floor(parseFloat(data.price) || 0);
-                formatPriceInput(priceInput);
-
-                // Sync the SKU select as well
-                row.find('.sku-select').val(data.product_id || '');
-
-                calculateRowTotal(row.find('.qty-input')[0]);
+            if (type === 'sku') {
+                $('#search_name').val(val);
+            } else {
+                $('#search_sku').val(val);
             }
         }
 
+        function addItemToInvoice() {
+            const productId = $('#search_name').val();
+            const qty = parseInt($('#search_qty').val());
+            const price = parseFloat($('#search_price').data('raw-value')) || 0;
+
+            if (!productId) {
+                alert('Vui lòng chọn sản phẩm');
+                return;
+            }
+
+            if (isNaN(qty) || qty <= 0) {
+                alert('Số lượng không hợp lệ');
+                return;
+            }
+
+            const option = $('#search_name').find(':selected');
+            const product = {
+                product_id: productId,
+                product_code: option.data('code'),
+                product_name: option.data('name'),
+                quantity: qty,
+                price: price
+            };
+
+            selectedItems.push(product);
+            renderSelectedItems();
+            resetSearchSection();
+
+            // Try to focus back to search sku
+            setTimeout(() => $('#search_sku').focus(), 50);
+        }
+
+        function removeSelectedItem(index) {
+            selectedItems.splice(index, 1);
+            renderSelectedItems();
+        }
+
+        function updateItem(index, field, element) {
+            let value = element.value;
+
+            if (field === 'quantity') {
+                value = parseInt(value);
+                if (isNaN(value) || value <= 0) {
+                    alert('Số lượng không hợp lệ');
+                    element.value = selectedItems[index].quantity;
+                    return;
+                }
+                selectedItems[index].quantity = value;
+            } else if (field === 'price') {
+                let rawValue = parseInt(value.replace(/\D/g, '')) || 0;
+                selectedItems[index].price = rawValue;
+            }
+
+            // Re-render to update totals
+            renderSelectedItems();
+        }
+
+        function renderSelectedItems() {
+            const tbody = $('#selected-items-tbody');
+            tbody.empty();
+
+            let totalQty = 0;
+            let grandTotal = 0;
+
+            selectedItems.forEach((item, index) => {
+                const total = item.quantity * item.price;
+                totalQty += item.quantity;
+                grandTotal += total;
+
+                tbody.append(`
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td>${item.product_code || '-'}</td>
+                        <td>${item.product_name}</td>
+                        <td class="text-center" style="width: 100px;">
+                             <input type="number" class="form-control form-control-sm text-center" 
+                                value="${item.quantity}" min="1" 
+                                onchange="updateItem(${index}, 'quantity', this)">
+                        </td>
+                        <td class="text-end" style="width: 150px;">
+                             <input type="text" class="form-control form-control-sm text-end" 
+                                value="${new Intl.NumberFormat('vi-VN').format(item.price)}"
+                                onfocus="this.select()"
+                                onchange="updateItem(${index}, 'price', this)">
+                        </td>
+                        <td class="text-end fw-bold">${formatCurrency(total)}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeSelectedItem(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            if (selectedItems.length === 0) {
+                tbody.append('<tr><td colspan="7" class="text-center py-3 text-muted">Chưa có sản phẩm nào</td></tr>');
+            }
+
+            $('#footer-total-qty').text(totalQty);
+            $('#footer-grand-total').text(formatCurrency(grandTotal));
+        }
+
         window.formatPriceInput = function (input) {
-            // Remove any dots/separators added by formatting
             let value = input.value.toString().replace(/\D/g, '');
             if (value === '') value = '0';
             const numValue = parseInt(value);
@@ -855,73 +967,23 @@
             $(input).data('raw-value', numValue);
         }
 
-        function removeProductRow(btn) {
-            if ($('#product-list .product-row').length > 1) {
-                $(btn).closest('.product-row').remove();
-                calculateGrandTotal();
-            } else {
-                alert('Phải có ít nhất 1 sản phẩm');
-            }
-        }
-
-        window.syncProductSelects = function (select, type) {
-            const row = $(select).closest('.product-row');
-            const val = $(select).val();
-
-            if (type === 'sku') {
-                row.find('.product-select').val(val);
-            } else {
-                row.find('.sku-select').val(val);
-            }
-
-            // Note: Per user request, price is NOT auto-filled.
-            // But we still recalculate the row total
-            calculateRowTotal(row.find('.qty-input')[0]);
-        }
-
-        window.calculateRowTotal = function (input) {
-            const row = $(input).closest('.product-row');
-            const qty = parseInt(row.find('.qty-input').val()) || 0;
-            const price = parseFloat(row.find('.price-input').data('raw-value')) || 0;
-
-            const total = qty * price;
-            row.find('.total-input').val(formatCurrency(total));
-            row.find('.total-input').data('raw-total', total);
-
-            calculateGrandTotal();
-        }
-
-        function calculateGrandTotal() {
-            let total = 0;
-            $('.total-input').each(function () {
-                total += parseFloat($(this).data('raw-total')) || 0;
-            });
-            $('#grand-total').text(formatCurrency(total));
-        }
-
         function submitInvoice() {
             const customerId = $('#customer_id').val();
             if (!customerId) { alert('Vui lòng chọn khách hàng'); return; }
 
-            const products = [];
-            let isValid = true;
-            $('#product-list .product-row').each(function () {
-                const productId = $(this).find('.product-select').val();
-                if (!productId) { isValid = false; return; }
-
-                products.push({
-                    product_id: productId,
-                    quantity: $(this).find('.qty-input').val(),
-                    price: $(this).find('.price-input').data('raw-value') || 0
-                });
-            });
-
-            if (!isValid) { alert('Vui lòng chọn sản phẩm'); return; }
+            if (selectedItems.length === 0) {
+                alert('Vui lòng thêm ít nhất 1 sản phẩm');
+                return;
+            }
 
             const data = {
                 customer_id: customerId,
                 invoice_date: $('#invoice_date').val(),
-                details: products
+                details: selectedItems.map(item => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
             };
 
             const url = editingInvoiceId ? `{{ url('/invoices') }}/${editingInvoiceId}` : '{{ route("invoices.store") }}';
@@ -980,6 +1042,7 @@
                             <table class="table table-bordered">
                                 <thead class="table-light">
                                     <tr>
+                                        <th class="text-center">STT</th>
                                         <th>Sản phẩm</th>
                                         <th class="text-center">SL</th>
                                         <th class="text-end">Đơn giá</th>
@@ -989,9 +1052,12 @@
                                 <tbody>
                     `;
 
-                    data.details.forEach(d => {
+                    let totalQty = 0;
+                    data.details.forEach((d, idx) => {
+                        totalQty += parseInt(d.quantity);
                         html += `
                             <tr>
+                                <td class="text-center">${idx + 1}</td>
                                 <td>${d.product_name}</td>
                                 <td class="text-center">${d.quantity}</td>
                                 <td class="text-end">${formatCurrency(d.price)}</td>
@@ -1004,8 +1070,9 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th colspan="3" class="text-end">TỔNG CỘNG:</th>
-                                        <th class="text-end text-primary" style="font-size: 18px;">${formatCurrency(data.total_amount)}</th>
+                                        <th colspan="2" class="text-end">TỔNG CỘNG:</th>
+                                        <th class="text-center">${totalQty}</th>
+                                        <th class="text-end" colspan="2" style="font-size: 18px; color: #667eea;">${formatCurrency(data.total_amount)}</th>
                                     </tr>
                                 </tfoot>
                             </table>

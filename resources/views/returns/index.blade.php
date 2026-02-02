@@ -21,6 +21,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* Navbar */
         .navbar {
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -53,17 +54,6 @@
             white-space: nowrap;
         }
 
-        .page-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .page-title i {
-            margin-right: 10px;
-            color: #667eea;
-        }
-
         .nav-link:hover {
             background: #f0f0f0;
             color: #667eea;
@@ -78,6 +68,50 @@
             margin-right: 8px;
         }
 
+        .navbar-logout {
+            margin-left: auto;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .page-title i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            font-size: 15px;
+        }
+
+        .btn-create:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f94 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        /* Summary Cards */
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -93,6 +127,11 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
         }
 
         .summary-icon {
@@ -128,22 +167,7 @@
             color: #333;
         }
 
-        .table-container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
+        /* Filters */
         .filters {
             background: white;
             padding: 20px;
@@ -159,11 +183,142 @@
             align-items: flex-end;
         }
 
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
         .form-control,
         .form-select {
+            border: 1px solid #ddd;
+            border-radius: 5px;
             height: 40px;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            height: 40px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .btn-filter:hover {
+            color: white;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #333;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .product-row {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .product-row>div {
+            margin-bottom: 5px;
+        }
+
+        .btn-remove-item {
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            background: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-remove-item:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Select2 override */
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #ced4da !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px !important;
         }
 
         .badge-khach {
@@ -180,100 +335,6 @@
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
-        }
-
-        /* Fix Select2 alignment in filters */
-        .filters .select2-container--default .select2-selection--single {
-            height: 40px;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-        }
-
-        .filters .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px;
-        }
-
-        .filters .select2-container {
-            width: 100% !important;
-        }
-
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 5px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .btn-delete:hover {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-view {
-            background: #6366f1;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 5px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .btn-view:hover {
-            background: #4f46e5;
-            color: white;
-        }
-
-        .btn-warning {
-            width: 32px;
-            height: 32px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Product Row Styles */
-        .product-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            align-items: flex-end;
-        }
-
-        .product-row>div {
-            margin-bottom: 5px;
-        }
-
-        .btn-remove-item {
-            background: #fee2e2;
-            color: #dc2626;
-            border: none;
-            width: 38px;
-            height: 38px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 5px;
-        }
-
-        .btn-remove-item:hover {
-            background: #dc2626;
-            color: white;
         }
     </style>
 </head>
@@ -326,9 +387,11 @@
     </nav>
 
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="page-title"><i class="bi bi-arrow-return-left text-primary"></i> Quản lý Trả Hàng</h1>
-            <button class="btn btn-add" onclick="openCreateModal()">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="bi bi-arrow-return-left"></i> Quản lý Trả Hàng
+            </h1>
+            <button class="btn-create" onclick="openCreateModal()">
                 <i class="bi bi-plus-circle"></i> Tạo đơn trả hàng
             </button>
         </div>
@@ -377,7 +440,7 @@
                         <option value="">Tất cả</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" style="height: 40px;" onclick="loadReturns()">
+                <button class="btn btn-filter" onclick="loadReturns()">
                     <i class="bi bi-search"></i> Tìm kiếm
                 </button>
             </div>
@@ -407,55 +470,125 @@
 
     <!-- Modal Form -->
     <div class="modal fade" id="returnModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Tạo Đơn Trả Hàng</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title">Tạo Đơn Trả Hàng</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="return-form">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Khách hàng *</label>
-                                <select class="form-select select2" id="customer_id" name="customer_id" required>
+                                <label class="form-label">Chọn Khách Hàng *</label>
+                                <select class="form-select select2" id="customer_id" name="customer_id" required
+                                    style="width: 100%">
                                     <option value="">-- Chọn khách hàng --</option>
                                     @foreach($customers as $c)
-                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                        <option value="{{ $c->id }}" data-phone="{{ $c->phone ?? '' }}">{{ $c->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Ngày trả *</label>
-                                <input type="date" class="form-control" id="return_date" name="return_date" required>
+                                <label class="form-label">Số Điện Thoại</label>
+                                <input type="text" class="form-control" id="customer_phone" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ngày trả *</label>
+                            <input type="date" class="form-control" id="return_date" name="return_date" required>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6>Thêm sản phẩm trả lại</h6>
+                                <div class="product-row" id="search-section">
+                                    <div style="flex: 1.5">
+                                        <label class="form-label small">Mã hàng</label>
+                                        <select class="form-select sku-select" id="search_sku"
+                                            onchange="syncSearchSelects(this, 'sku')">
+                                            <option value="">-- Mã --</option>
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}" data-code="{{ $product->code }}"
+                                                    data-name="{{ $product->name }}" data-price="{{ $product->price }}">
+                                                    {{ $product->code }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div style="flex: 2.5">
+                                        <label class="form-label small">Tên sản phẩm</label>
+                                        <select class="form-select product-select" id="search_name"
+                                            onchange="syncSearchSelects(this, 'name')">
+                                            <option value="">-- Chọn sản phẩm --</option>
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}" data-code="{{ $product->code }}"
+                                                    data-name="{{ $product->name }}" data-price="{{ $product->price }}">
+                                                    {{ $product->name }} (Tồn: {{ $product->quantity }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div style="flex: 0.8">
+                                        <label class="form-label small">SL</label>
+                                        <input type="number" class="form-control" id="search_qty" value="1" min="1">
+                                    </div>
+                                    <div style="flex: 1.2">
+                                        <label class="form-label small">Giá hoàn</label>
+                                        <input type="text" class="form-control" id="search_price" value="0"
+                                            oninput="formatPriceInput(this)">
+                                    </div>
+                                    <div style="flex: 0.5">
+                                        <label class="form-label small">&nbsp;</label>
+                                        <button type="button" class="btn btn-primary w-100" onclick="addItemToReturn()">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label d-flex justify-content-between align-items-center">
-                                <span class="fw-bold">Danh sách sản phẩm sản phẩm trả lại</span>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProductRow()">
-                                    <i class="bi bi-plus"></i> Thêm sản phẩm
-                                </button>
-                            </label>
-                            <div id="product-list">
-                                <!-- Product Rows -->
-                            </div>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 50px;">STT</th>
+                                        <th style="width: 120px;">Mã SP</th>
+                                        <th>Tên Sản Phẩm</th>
+                                        <th class="text-center" style="width: 80px;">SL</th>
+                                        <th class="text-end" style="width: 130px;">Giá hoàn</th>
+                                        <th class="text-end" style="width: 150px;">Thành tiền</th>
+                                        <th class="text-center" style="width: 50px;">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="selected-items-tbody">
+                                    <!-- Rows added dynamically -->
+                                </tbody>
+                                <tfoot class="table-light fw-bold" id="selected-items-tfoot">
+                                    <tr>
+                                        <td colspan="3" class="text-end">Tổng số lượng:</td>
+                                        <td class="text-center" id="footer-total-qty">0</td>
+                                        <td class="text-end">TỔNG TIỀN:</td>
+                                        <td class="text-end text-primary" id="footer-grand-total">0 đ</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Lý do trả</label>
-                            <textarea class="form-control" name="reason" rows="2"
+                            <label class="form-label">Lý do trả</label>
+                            <textarea class="form-control" name="reason" id="return_reason" rows="2"
                                 placeholder="Nhập lý do khách trả hàng..."></textarea>
                         </div>
 
-                        <div class="mb-3 text-end">
-                            <h4>Tổng Tiền Hoàn: <span id="grand-total" class="text-danger">0 đ</span></h4>
-                        </div>
-
                         <input type="hidden" name="status" id="status_input" value="khách trả">
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-2">Lưu đơn trả hàng</button>
                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="submitReturn()">Lưu đơn trả hàng</button>
                 </div>
             </div>
         </div>
@@ -473,241 +606,374 @@
                     Loading...
                 </div>
                 <div class="modal-footer">
+                    <button class="btn btn-info text-white" onclick="printReturn()">
+                        <i class="bi bi-printer"></i> In Phiếu
+                    </button>
+                    <button class="btn btn-danger" onclick="downloadReturnPDF()">
+                        <i class="bi bi-file-pdf"></i> Xuất PDF
+                    </button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden template for product row -->
-    <template id="product-row-template">
-        <div class="product-row">
-            <div style="flex: 1.5">
-                <label class="form-label small">Mã hàng</label>
-                <select class="form-select sku-select" onchange="syncProductSelects(this, 'sku')" required>
-                    <option value="">-- Mã --</option>
-                    @foreach($products as $product)
-                        <option value="{{ $product->id }}" data-price="{{ $product->price }}">
-                            {{ $product->code }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div style="flex: 2.5">
-                <label class="form-label small">Tên sản phẩm</label>
-                <select class="form-select product-select" onchange="syncProductSelects(this, 'name')" required>
-                    <option value="">-- Chọn sản phẩm --</option>
-                    @foreach($products as $product)
-                        <option value="{{ $product->id }}" data-price="{{ $product->price }}">
-                            {{ $product->name }} (Tồn: {{ $product->quantity }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div style="flex: 1.2">
-                <label class="form-label small">Giá hoàn</label>
-                <input type="text" class="form-control price-input" value="0"
-                    oninput="formatPriceInput(this); calculateRowTotal(this)">
-            </div>
-            <div style="flex: 0.8">
-                <label class="form-label small">SL</label>
-                <input type="number" class="form-control qty-input" min="1" value="1" oninput="calculateRowTotal(this)">
-            </div>
-            <div style="flex: 1.2">
-                <label class="form-label small">Thành tiền</label>
-                <input type="text" class="form-control total-input fw-bold text-danger" value="0" readonly>
-            </div>
-            <button type="button" class="btn-remove-item" onclick="removeProductRow(this)">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    </template>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         const formatCurrency = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-
-        window.formatPriceInput = function (input, rawValue) {
-            let numValue;
-            if (rawValue !== undefined) {
-                numValue = parseInt(rawValue) || 0;
-            } else {
-                let value = input.value.toString().replace(/\D/g, '');
-                if (value === '') value = '0';
-                numValue = parseInt(value);
-            }
-            input.value = new Intl.NumberFormat('vi-VN').format(numValue);
-            $(input).data('raw-value', numValue);
-        }
-
-        function addProductRow() {
-            const template = document.getElementById('product-row-template');
-            const clone = template.content.cloneNode(true);
-            const row = $(clone).find('.product-row');
-            $('#product-list').append(row);
-
-            // Re-bind select2 or any other init if needed. 
-            // Plain selects for now to be simple but compatible.
-        }
-
-        function removeProductRow(btn) {
-            if ($('#product-list .product-row').length > 1) {
-                $(btn).closest('.product-row').remove();
-                calculateGrandTotal();
-            } else {
-                alert('Phải có ít nhất 1 sản phẩm');
-            }
-        }
-
-        window.syncProductSelects = function (select, type) {
-            const row = $(select).closest('.product-row');
-            const val = $(select).val();
-            if (type === 'sku') {
-                row.find('.product-select').val(val);
-            } else {
-                row.find('.sku-select').val(val);
-            }
-
-            // Note: Price is NOT auto-filled as per user request.
-            calculateRowTotal(row.find('.qty-input')[0]);
-        }
-
-        window.calculateRowTotal = function (input) {
-            const row = $(input).closest('.product-row');
-            const qty = parseInt(row.find('.qty-input').val()) || 0;
-            const price = parseFloat(row.find('.price-input').data('raw-value')) || 0;
-            const total = qty * price;
-            row.find('.total-input').val(new Intl.NumberFormat('vi-VN').format(total));
-            row.find('.total-input').data('raw-total', total);
-            calculateGrandTotal();
-        }
-
-        function calculateGrandTotal() {
-            let total = 0;
-            $('.total-input').each(function () {
-                total += parseFloat($(this).data('raw-total')) || 0;
-            });
-            $('#grand-total').text(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total));
-        }
 
         let returnModal;
         let detailModal;
         let editingId = null;
+        let selectedItems = [];
 
         $(document).ready(function () {
             returnModal = new bootstrap.Modal(document.getElementById('returnModal'));
             detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-            $('.select2').select2();
 
-            $('#returnModal').on('shown.bs.modal', function () {
-                $('#customer_id').select2({ dropdownParent: $('#returnModal') });
+            $('.select2').each(function () {
+                $(this).select2({
+                    dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : null
+                });
             });
 
-            document.getElementById('return_date').valueAsDate = new Date();
+            // Update phone when select customer
+            $('#customer_id').on('change', function () {
+                const phone = $(this).find(':selected').data('phone');
+                $('#customer_phone').val(phone || '');
+            });
+
+            window.openCreateModal = function () {
+                editingId = null;
+                selectedItems = [];
+                $('#return-form')[0].reset();
+                $('#customer_id').val('').trigger('change');
+                $('#return_date')[0].valueAsDate = new Date();
+                resetSearchSection();
+                renderSelectedItems();
+                $('.modal-title').text('Tạo Đơn Trả Hàng');
+                returnModal.show();
+            }
+
+            window.openEditModal = function (id) {
+                editingId = id;
+                selectedItems = [];
+                $('.modal-title').text('Sửa Đơn Trả Hàng');
+
+                fetch(`{{ url('/returns') }}/${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        $('#customer_id').val(data.customer_id).trigger('change');
+                        $('#return_date').val(data.return_date);
+                        $('#return_reason').val(data.reason || '');
+                        $('#status_input').val(data.status);
+
+                        selectedItems = data.details.map(d => ({
+                            product_id: d.product_id,
+                            product_code: d.product ? d.product.code : (d.product_name.split(' ')[0] || '-'), // Fallback
+                            product_name: d.product_name,
+                            quantity: parseInt(d.quantity),
+                            price: parseFloat(d.refund_price)
+                        }));
+
+                        resetSearchSection();
+                        renderSelectedItems();
+                        returnModal.show();
+                    });
+            }
+
+            window.resetSearchSection = function () {
+                $('#search_sku').val('').trigger('change');
+                $('#search_name').val('').trigger('change');
+                $('#search_qty').val(1);
+                $('#search_price').val(0).data('raw-value', 0);
+            }
+
+            window.syncSearchSelects = function (select, type) {
+                const val = $(select).val();
+                if (type === 'sku') {
+                    $('#search_name').val(val);
+                } else {
+                    $('#search_sku').val(val);
+                }
+            }
+
+            window.formatPriceInput = function (input) {
+                let value = input.value.toString().replace(/\D/g, '');
+                if (value === '') value = '0';
+                const numValue = parseInt(value);
+                input.value = new Intl.NumberFormat('vi-VN').format(numValue);
+                $(input).data('raw-value', numValue);
+            }
+
+            window.addItemToReturn = function () {
+                const productId = $('#search_name').val();
+                const qty = parseInt($('#search_qty').val());
+                const price = parseFloat($('#search_price').data('raw-value')) || 0;
+
+                if (!productId) {
+                    alert('Vui lòng chọn sản phẩm');
+                    return;
+                }
+
+                if (isNaN(qty) || qty <= 0) {
+                    alert('Số lượng không hợp lệ');
+                    return;
+                }
+
+                const option = $('#search_name').find(':selected');
+                const product = {
+                    product_id: productId,
+                    product_code: option.data('code'),
+                    product_name: option.data('name'),
+                    quantity: qty,
+                    price: price
+                };
+
+                selectedItems.push(product);
+                renderSelectedItems();
+                resetSearchSection();
+
+                setTimeout(() => $('#search_sku').focus(), 50);
+            }
+
+            window.removeSelectedItem = function (index) {
+                selectedItems.splice(index, 1);
+                renderSelectedItems();
+            }
+
+            $('#return_date')[0].valueAsDate = new Date();
             loadReturns();
 
-            // Handle Enter key to add product row
-            $(document).on('keydown', function (e) {
-                if ($('#returnModal').hasClass('show')) {
-                    if (e.key === 'Enter' && !$(e.target).is('button, a, textarea')) {
+            // Handle keydown in search section
+            $(document).on('keydown', '#search-section input, #search-section select', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addItemToReturn();
+                }
+
+                const focusables = $('#search-section').find('.sku-select, .product-select, #search_qty, #search_price');
+                const index = focusables.index(this);
+
+                if (e.key === 'ArrowRight') {
+                    if (index < focusables.length - 1) {
                         e.preventDefault();
-                        addProductRow();
-                        // Focus the SKU select of the newly added row
-                        setTimeout(() => {
-                            $('#product-list .product-row:last .sku-select').focus();
-                        }, 50);
+                        focusables.eq(index + 1).focus();
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (index > 0) {
+                        e.preventDefault();
+                        focusables.eq(index - 1).focus();
                     }
                 }
             });
         });
 
-        function openCreateModal() {
-            editingId = null;
-            $('#return-form')[0].reset();
-            $('#product-list').empty();
-            $('#customer_id').val('').trigger('change');
-            document.getElementById('return_date').valueAsDate = new Date();
-            document.getElementById('grand-total').textContent = '0 đ';
-            $('.modal-title').text('Tạo Đơn Trả Hàng');
-            addProductRow();
-            returnModal.show();
+        // ... (existing functions)
+
+        function updateItem(index, field, element) {
+            let value = element.value;
+
+            if (field === 'quantity') {
+                value = parseInt(value);
+                if (isNaN(value) || value <= 0) {
+                    alert('Số lượng không hợp lệ');
+                    element.value = selectedItems[index].quantity;
+                    return;
+                }
+                selectedItems[index].quantity = value;
+            } else if (field === 'price') {
+                // Ensure formatPriceInput is called first or handles the formatting
+                // For simplified inline edit, we might rely on the raw value or re-parse
+                let rawValue = parseInt(value.replace(/\D/g, '')) || 0;
+                selectedItems[index].price = rawValue;
+                // Re-format the input to show pretty currency
+                element.value = new Intl.NumberFormat('vi-VN').format(rawValue);
+            }
+
+            renderSelectedItems(false); // Pass false to avoid re-rendering inputs (losing focus)
         }
 
-        function openEditModal(id) {
-            editingId = id;
-            $('.modal-title').text('Sửa Đơn Trả Hàng');
-            $('#product-list').empty();
+        // Modified render function to accept a flag to prevent full re-render if we want to keep focus
+        // But simpler: just re-render and don't worry about focus for now, or use onchange which is naturally fine.
+        // Actually, for "price" oninput, re-rendering the whole table is bad.
+        // Let's keep renderSelectedItems simple and just update totals in a separate function?
+        // Or better: update the DOM directly in updateItem and only re-render totals.
+        // For now, let's just re-render but maybe we need a way to not kill the input we are typing in.
 
-            fetch(`{{ url('/returns') }}/${id}`)
+        function updateTableTotals() {
+            let totalQty = 0;
+            let grandTotal = 0;
+
+            selectedItems.forEach((item, index) => {
+                const total = item.quantity * item.price;
+                totalQty += item.quantity;
+                grandTotal += total;
+
+                // Update row total cell
+                $(`#item-total-${index}`).text(formatCurrency(total));
+            });
+
+            $('#footer-total-qty').text(totalQty);
+            $('#footer-grand-total').text(formatCurrency(grandTotal));
+        }
+
+        function renderSelectedItems() {
+            const tbody = $('#selected-items-tbody');
+            // If we are calling this from updateItem, we shouldn't wipe everything if we want to keep focus?
+            // But requirement allows "edit number and price".
+            // Let's just render inputs.
+
+            // Check if we already have rows and if we are just updating? 
+            // The simplest sustainable way is to re-render. 
+            // If user types in input, 'onchange' triggers. 'oninput' for price?
+
+            tbody.empty();
+
+            let totalQty = 0;
+            let grandTotal = 0;
+
+            selectedItems.forEach((item, index) => {
+                const total = item.quantity * item.price;
+                totalQty += item.quantity;
+                grandTotal += total;
+
+                tbody.append(`
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td>${item.product_code || '-'}</td>
+                        <td>${item.product_name}</td>
+                        <td class="text-center" style="width: 100px;">
+                            <input type="number" class="form-control form-control-sm text-center" 
+                                value="${item.quantity}" min="1" 
+                                onchange="updateItem(${index}, 'quantity', this)">
+                        </td>
+                        <td class="text-end" style="width: 150px;">
+                            <input type="text" class="form-control form-control-sm text-end" 
+                                value="${new Intl.NumberFormat('vi-VN').format(item.price)}"
+                                onfocus="this.select()"
+                                onchange="updateItem(${index}, 'price', this)"> 
+                        </td>
+                        <td class="text-end fw-bold text-danger" id="item-total-${index}">${formatCurrency(total)}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeSelectedItem(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            if (selectedItems.length === 0) {
+                tbody.append('<tr><td colspan="7" class="text-center py-3 text-muted">Chưa có sản phẩm nào</td></tr>');
+            }
+
+            $('#footer-total-qty').text(totalQty);
+            $('#footer-grand-total').text(formatCurrency(grandTotal));
+        }
+
+        function submitReturn() {
+            const customerId = $('#customer_id').val();
+            const returnDate = $('#return_date').val();
+
+            if (!returnDate) { alert('Vui lòng chọn ngày trả'); return; }
+            if (selectedItems.length === 0) {
+                alert('Vui lòng thêm ít nhất 1 sản phẩm');
+                return;
+            }
+
+            const data = {
+                customer_id: customerId,
+                return_date: returnDate,
+                reason: $('#return_reason').val(),
+                status: $('#status_input').val(),
+                details: selectedItems.map(item => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    refund_price: item.price
+                }))
+            };
+
+            const url = editingId ? `{{ url('/returns') }}/${editingId}` : '{{ route("returns.store") }}';
+            const method = editingId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(data)
+            })
                 .then(res => res.json())
-                .then(data => {
-                    $('#customer_id').val(data.customer_id).trigger('change');
-                    $('#return_date').val(data.return_date);
-                    $('textarea[name="reason"]').val(data.reason || '');
-                    $('#status_input').val(data.status);
-
-                    data.details.forEach(detail => {
-                        const template = document.getElementById('product-row-template');
-                        const clone = template.content.cloneNode(true);
-                        const row = $(clone).find('.product-row');
-                        
-                        row.find('.sku-select').val(detail.product_id);
-                        row.find('.product-select').val(detail.product_id);
-                        row.find('.qty-input').val(detail.quantity);
-                        
-                        const priceInput = row.find('.price-input')[0];
-                        // Convert DB string (e.g. "100000.00") to clean integer
-                        const rawPrice = Math.round(parseFloat(detail.refund_price) || 0);
-                        formatPriceInput(priceInput, rawPrice);
-
-                        $('#product-list').append(row);
-                        calculateRowTotal(row.find('.qty-input')[0]);
-                    });
-
-                    returnModal.show();
+                .then(res => {
+                    if (res.success) {
+                        returnModal.hide();
+                        loadReturns();
+                        alert(res.message);
+                    } else {
+                        alert(res.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Có lỗi xảy ra');
                 });
         }
 
+        let currentReturnId = null;
+
         function viewReturn(id) {
+            currentReturnId = id;
             $('#detail-content').html('Loading...');
             detailModal.show();
 
             fetch(`{{ url('/returns') }}/${id}`)
                 .then(res => res.json())
                 .then(data => {
+                    let totalQty = 0;
                     let html = `
-                        <div class="mb-3">
-                            <strong>Khách hàng:</strong> ${data.customer ? data.customer.name : 'Nhà cung cấp'}
-                        </div>
-                        <div class="mb-3">
-                            <strong>Ngày trả:</strong> ${new Date(data.return_date).toLocaleDateString('vi-VN')}
-                        </div>
-                        <div class="mb-3">
-                            <strong>Trạng thái:</strong> ${data.status}
-                        </div>
-                        <div class="mb-3">
-                            <strong>Lý do:</strong> ${data.reason || 'Không có'}
-                        </div>
-                        <hr>
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Sản phẩm</th>
-                                    <th>SL</th>
-                                    <th class="text-end">Đơn giá</th>
-                                    <th class="text-end">Tổng</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div id="return-receipt" style="padding: 10px; font-family: Arial, sans-serif;">
+                            <div class="text-center mb-4">
+                                <h3 style="margin-bottom: 5px; font-weight: bold;">PHIẾU TRẢ HÀNG</h3>
+                                <p style="font-size: 14px; color: #555;">Số: TH-${data.id}</p>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <p style="margin-bottom: 5px;"><strong>Khách hàng:</strong> ${data.customer ? data.customer.name : 'Nhà cung cấp'}</p>
+                                    <p style="margin-bottom: 5px;"><strong>Ngày trả:</strong> ${new Date(data.return_date).toLocaleDateString('vi-VN')}</p>
+                                    <p style="margin-bottom: 5px;"><strong>Lý do:</strong> ${data.reason || 'Không có'}</p>
+                                </div>
+                            </div>
+
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">STT</th>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">SL</th>
+                                        <th class="text-end">Đơn giá</th>
+                                        <th class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                     `;
 
-                    data.details.forEach(d => {
+                    data.details.forEach((d, idx) => {
+                        totalQty += parseInt(d.quantity);
                         html += `
                             <tr>
+                                <td class="text-center">${idx + 1}</td>
                                 <td>${d.product_name}</td>
-                                <td>${d.quantity}</td>
+                                <td class="text-center">${d.quantity}</td>
                                 <td class="text-end">${formatCurrency(d.refund_price)}</td>
                                 <td class="text-end">${formatCurrency(d.quantity * d.refund_price)}</td>
                             </tr>
@@ -715,18 +981,60 @@
                     });
 
                     html += `
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th colspan="3" class="text-end">Tổng cộng:</th>
-                                    <th class="text-end text-danger">${formatCurrency(data.total_refund_amount)}</th>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2" class="text-end">TỔNG CỘNG:</th>
+                                        <th class="text-center">${totalQty}</th>
+                                        <th class="text-end" colspan="2" style="font-size: 18px; color: #667eea;">${formatCurrency(data.total_refund_amount)}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            
+                            <div class="mt-5 row">
+                                <div class="col-6 text-center">
+                                    <p><strong>Người trả hàng</strong></p>
+                                    <p style="margin-top: 60px;">(Ký, ghi rõ họ tên)</p>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p><strong>Người nhận hàng</strong></p>
+                                    <p style="margin-top: 60px;">(Ký, ghi rõ họ tên)</p>
+                                </div>
+                            </div>
+                        </div>
                     `;
 
                     $('#detail-content').html(html);
                 });
+        }
+
+        function printReturn() {
+            const content = document.getElementById('return-receipt').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>In Phiếu Trả</title>');
+            printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
+            printWindow.document.write('<style>body { padding: 20px; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+
+            printWindow.onload = function () {
+                printWindow.print();
+                printWindow.close();
+            };
+        }
+
+        function downloadReturnPDF() {
+            const element = document.getElementById('return-receipt');
+            const opt = {
+                margin: 0.5,
+                filename: `phieu_tra_hang_th${currentReturnId}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
 
         function loadReturns() {
@@ -765,7 +1073,7 @@
                                         <button class="btn-view" title="Xem" onclick="viewReturn(${r.id})">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-warning btn-sm text-white" title="Sửa" onclick="openEditModal(${r.id})">
+                                        <button class="btn-edit" title="Sửa" onclick="openEditModal(${r.id})">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <button class="btn-delete" title="Xóa" onclick="deleteReturn(${r.id})">
