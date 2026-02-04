@@ -337,6 +337,52 @@
         .btn-trash-toggle.active {
             background: #dc3545;
         }
+
+        /* Hide number spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Autocomplete styles */
+        .search-wrapper {
+            position: relative;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestions-list li {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .suggestions-list li:hover,
+        .suggestions-list li.active {
+            background-color: #f0f4ff;
+            color: #667eea;
+        }
     </style>
 </head>
 
@@ -513,18 +559,11 @@
                             <div class="card-body">
                                 <h6>Thêm sản phẩm mới</h6>
                                 <div class="product-row" id="search-section">
-                                    <div style="flex: 1.5">
+                                    <div style="flex: 1.5; position: relative;">
                                         <label class="form-label small">Mã hàng</label>
-                                        <select class="form-select sku-select" id="search_sku"
-                                            onchange="syncSearchSelects(this, 'sku')">
-                                            <option value="">-- Mã --</option>
-                                            @foreach($products as $product)
-                                                <option value="{{ $product->id }}" data-price="{{ $product->price }}"
-                                                    data-code="{{ $product->code }}" data-name="{{ $product->name }}">
-                                                    {{ $product->code }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" class="form-control" id="search_sku" placeholder="Nhập mã..."
+                                            autocomplete="off">
+                                        <ul class="suggestions-list" id="sku-suggestions"></ul>
                                     </div>
                                     <div style="flex: 2.5">
                                         <label class="form-label small">Tên sản phẩm</label>
@@ -542,12 +581,12 @@
                                     <div style="flex: 0.8">
                                         <label class="form-label small">SL</label>
                                         <input type="number" class="form-control qty-input" id="search_qty" min="1"
-                                            value="1">
+                                            placeholder="">
                                     </div>
                                     <div style="flex: 1.2">
                                         <label class="form-label small">Đơn giá</label>
-                                        <input type="text" class="form-control price-input" id="search_price" value="0"
-                                            oninput="formatPriceInput(this)">
+                                        <input type="text" class="form-control price-input" id="search_price"
+                                            placeholder="" oninput="formatPriceInput(this)">
                                     </div>
                                     <div style="flex: 0.5">
                                         <label class="form-label small">&nbsp;</label>
@@ -638,6 +677,7 @@
             return d.toLocaleDateString('vi-VN');
         }
 
+        const allProducts = @json($products);
         let createModal;
         let detailModal;
 
@@ -659,19 +699,27 @@
             // Handle keydown in search section
             $(document).on('keydown', '#search-section input, #search-section select', function (e) {
                 if (e.key === 'Enter') {
+                    // If suggestions are visible and active, select it
+                    const activeSuggestion = $('#sku-suggestions li.active');
+                    if ($('#sku-suggestions').is(':visible') && activeSuggestion.length > 0) {
+                        e.preventDefault();
+                        activeSuggestion.click();
+                        return;
+                    }
+
                     e.preventDefault();
                     addItemToInvoice();
                 }
 
                 if (e.key === 'ArrowRight') {
-                    const focusables = $('#search-section').find('.sku-select, .product-select, .qty-input, .price-input');
+                    const focusables = $('#search-section').find('#search_sku, .product-select, .qty-input, .price-input');
                     const index = focusables.index(this);
                     if (index < focusables.length - 1) {
                         e.preventDefault();
                         focusables.eq(index + 1).focus();
                     }
                 } else if (e.key === 'ArrowLeft') {
-                    const focusables = $('#search-section').find('.sku-select, .product-select, .qty-input, .price-input');
+                    const focusables = $('#search-section').find('#search_sku, .product-select, .qty-input, .price-input');
                     const index = focusables.index(this);
                     if (index > 0) {
                         e.preventDefault();
@@ -679,6 +727,71 @@
                     }
                 }
             });
+
+            // Autocomplete Logic
+            const $skuInput = $('#search_sku');
+            const $suggestions = $('#sku-suggestions');
+
+            $skuInput.on('input', function () {
+                const query = $(this).val().toLowerCase();
+                if (!query) {
+                    $suggestions.hide();
+                    return;
+                }
+                const matches = allProducts.filter(p => p.code.toLowerCase().includes(query));
+                renderSuggestions(matches);
+            });
+
+            $skuInput.on('keydown', function (e) {
+                const $items = $suggestions.find('li');
+                let activeIdx = $items.filter('.active').index();
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (activeIdx < $items.length - 1) activeIdx++;
+                    else activeIdx = 0;
+                    $items.removeClass('active').eq(activeIdx).addClass('active');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (activeIdx > 0) activeIdx--;
+                    else activeIdx = $items.length - 1;
+                    $items.removeClass('active').eq(activeIdx).addClass('active');
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.search-wrapper').length && !$(e.target).is('#search_sku')) {
+                    $suggestions.hide();
+                }
+            });
+
+            function renderSuggestions(products) {
+                $suggestions.empty();
+                if (products.length === 0) {
+                    $suggestions.hide();
+                    return;
+                }
+                products.forEach((p, index) => {
+                    const li = $(`<li>${p.code} - ${p.name}</li>`);
+                    li.on('click', function () {
+                        selectProduct(p);
+                    });
+                    if (index === 0) li.addClass('active');
+                    $suggestions.append(li);
+                });
+                $suggestions.show();
+            }
+
+            function selectProduct(product) {
+                $('#search_sku').val(product.code);
+                $('#search_name').val(product.id).trigger('change');
+                // Trigger change to update data (handled in syncSearchSelects via 'name' change)
+                // $('#search_name').trigger('change'); // SyncSearchSelects handles this
+                $suggestions.hide();
+                $('#search_qty').focus();
+            }
+
 
             loadInvoices();
         });
@@ -839,20 +952,26 @@
         }
 
         function resetSearchSection() {
-            $('#search_sku').val('').trigger('change');
+            $('#search_sku').val('');
             $('#search_name').val('').trigger('change');
-            $('#search_qty').val(1);
-            $('#search_price').val(0).data('raw-value', 0);
+            $('#search_qty').val('');
+            $('#search_price').val('').data('raw-value', 0);
+            $('#sku-suggestions').hide();
         }
 
         window.syncSearchSelects = function (select, type) {
             const val = $(select).val();
-            const option = $(select).find(':selected');
 
-            if (type === 'sku') {
-                $('#search_name').val(val);
-            } else {
-                $('#search_sku').val(val);
+            if (type === 'name') {
+                const option = $(select).find(':selected');
+                const code = option.data('code');
+                if (code) {
+                    $('#search_sku').val(code); // Update text input
+                } else {
+                    $('#search_sku').val('');
+                    $('#search_price').val('').data('raw-value', 0);
+                    $('#search_qty').val('');
+                }
             }
         }
 
@@ -976,6 +1095,9 @@
                 return;
             }
 
+            // Ask for printing preference
+            const shouldPrint = confirm('Bạn có muốn in hóa đơn không?');
+
             const data = {
                 customer_id: customerId,
                 invoice_date: $('#invoice_date').val(),
@@ -1003,6 +1125,15 @@
                         createModal.hide();
                         loadInvoices();
                         alert(data.message);
+
+                        if (shouldPrint && data.invoice && data.invoice.id) {
+                            // Fetch invoice details to print
+                            fetch(`{{ url('/invoices') }}/${data.invoice.id}`)
+                                .then(res => res.json())
+                                .then(invoiceData => {
+                                    printInvoiceDirectly(invoiceData);
+                                });
+                        }
                     } else {
                         alert(data.message);
                     }
@@ -1011,6 +1142,83 @@
                     console.error(err);
                     alert('Có lỗi xảy ra');
                 });
+        }
+
+        function printInvoiceDirectly(data) {
+            let html = `
+                <div id="invoice-receipt" style="padding: 10px; font-family: Arial, sans-serif;">
+                    <div class="text-center mb-4">
+                        <h3 style="margin-bottom: 5px; font-weight: bold;">HÓA ĐƠN BÁN HÀNG</h3>
+                        <p style="font-size: 14px; color: #555;">Số: HD-${data.id}</p>
+                    </div>
+                    <hr>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <p style="margin-bottom: 5px;"><strong>Khách hàng:</strong> ${data.customer.name}</p>
+                            <p style="margin-bottom: 5px;"><strong>Điện thoại:</strong> ${data.customer.phone || '-'}</p>
+                            <p style="margin-bottom: 5px;"><strong>Ngày lập:</strong> ${formatDate(data.invoice_date)}</p>
+                        </div>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">STT</th>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+            let totalQty = 0;
+            data.details.forEach((d, idx) => {
+                totalQty += parseInt(d.quantity);
+                html += `
+                    <tr>
+                        <td class="text-center">${idx + 1}</td>
+                        <td>${d.product_name}</td>
+                        <td class="text-center">${d.quantity}</td>
+                        <td class="text-end">${formatCurrency(d.price)}</td>
+                        <td class="text-end">${formatCurrency(d.total)}</td>
+                    </tr>`;
+            });
+
+            html += `
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2" class="text-end">TỔNG CỘNG:</th>
+                                <th class="text-center">${totalQty}</th>
+                                <th class="text-end" colspan="2" style="font-size: 18px; color: #667eea;">${formatCurrency(data.total_amount)}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="mt-5 row">
+                        <div class="col-6 text-center">
+                            <p><strong>Người mua hàng</strong></p>
+                            <p style="margin-top: 60px;">(Ký, ghi rõ họ tên)</p>
+                        </div>
+                        <div class="col-6 text-center">
+                            <p><strong>Người bán hàng</strong></p>
+                            <p style="margin-top: 60px;">(Ký, ghi rõ họ tên)</p>
+                        </div>
+                    </div>
+                </div>`;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>In Hóa Đơn</title>');
+            printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
+            printWindow.document.write('<style>body { padding: 20px; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(html);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+
+            printWindow.onload = function () {
+                printWindow.print();
+                printWindow.close();
+            };
         }
 
         // --- View ---
@@ -1043,7 +1251,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="text-center">STT</th>
-                                        <th>Sản phẩm</th>
+                             <th>Sản phẩm</th>
                                         <th class="text-center">SL</th>
                                         <th class="text-end">Đơn giá</th>
                                         <th class="text-end">Thành tiền</th>
