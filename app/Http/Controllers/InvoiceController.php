@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\InvoiceDetail;
 use App\Models\Product;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -121,6 +122,17 @@ class InvoiceController extends Controller
                 // Deduct stock
                 $product->quantity -= $item['quantity'];
                 $product->save();
+            }
+
+            // Tự động tạo bản ghi thu nếu khách hàng là "Khách lẻ" hoặc "Miền"
+            if (in_array($customer->name, ['Khách lẻ', 'Miền'])) {
+                Transaction::create([
+                    'amount' => $totalAmount,
+                    'description' => "Thu tiền từ hóa đơn khách " . $customer->name,
+                    'transaction_date' => $validated['invoice_date'],
+                    'type' => 'income',
+                    'invoice_id' => $invoice->id
+                ]);
             }
 
             DB::commit();

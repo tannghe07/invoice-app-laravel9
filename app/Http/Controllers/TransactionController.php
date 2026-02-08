@@ -166,12 +166,6 @@ class TransactionController extends Controller
 
         $transaction = Transaction::findOrFail($id);
 
-        if ($transaction->invoice_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể sửa giao dịch liên kết với hóa đơn!'
-            ], 400);
-        }
 
         $transaction->update([
             'amount' => $request->amount,
@@ -191,12 +185,6 @@ class TransactionController extends Controller
         $transaction = Transaction::findOrFail($id);
 
         // Don't allow deleting transactions linked to invoices
-        if ($transaction->invoice_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể xóa giao dịch liên kết với hóa đơn!'
-            ], 400);
-        }
 
         $transaction->delete();
 

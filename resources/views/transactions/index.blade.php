@@ -599,7 +599,7 @@
         let currentPage = 1;
 
         // Clear custom dates when selecting period
-        document.getElementById('filter_period').addEventListener('change', function() {
+        document.getElementById('filter_period').addEventListener('change', function () {
             if (this.value !== 'all') {
                 document.getElementById('filter_from').value = '';
                 document.getElementById('filter_to').value = '';
@@ -608,14 +608,14 @@
         });
 
         // Reset period when entering custom dates
-        document.getElementById('filter_from').addEventListener('change', function() {
+        document.getElementById('filter_from').addEventListener('change', function () {
             if (this.value) {
                 document.getElementById('filter_period').value = 'all';
             }
             loadTransactions();
         });
 
-        document.getElementById('filter_to').addEventListener('change', function() {
+        document.getElementById('filter_to').addEventListener('change', function () {
             if (this.value) {
                 document.getElementById('filter_period').value = 'all';
             }
@@ -693,14 +693,12 @@
                                         </span>
                                     </td>
                                     <td>
-                                        ${!transaction.invoice_id ? `
-                                            <button class="btn btn-warning btn-sm text-white" onclick="openEditModal(${transaction.id})">
-                                                <i class="bi bi-pencil"></i> Sửa
-                                            </button>
-                                            <button class="btn btn-delete btn-sm" onclick="deleteTransaction(${transaction.id})">
-                                                <i class="bi bi-trash"></i> Xóa
-                                            </button>
-                                        ` : '<span class="text-muted" style="font-size: 12px;">Từ hóa đơn</span>'}
+                                        <button class="btn btn-warning btn-sm text-white" onclick="openEditModal(${transaction.id})">
+                                            <i class="bi bi-pencil"></i> Sửa
+                                        </button>
+                                        <button class="btn btn-delete btn-sm" onclick="deleteTransaction(${transaction.id})">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
                                     </td>
                                 </tr>
                             `;
