@@ -383,51 +383,178 @@
             background-color: #f0f4ff;
             color: #667eea;
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 991.98px) {
+            .navbar {
+                margin-bottom: 20px;
+                padding: 10px 0;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                align-items: stretch;
+                margin: 15px 0;
+                width: 100%;
+                gap: 5px;
+            }
+
+            .nav-item {
+                width: 100%;
+            }
+
+            .nav-link {
+                display: block;
+                padding: 12px 15px;
+                border-radius: 8px;
+            }
+
+            .navbar-logout {
+                margin: 10px 0 0 0;
+                width: 100%;
+                text-align: center;
+            }
+
+            .navbar-logout button {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .container-fluid {
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .page-header-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .page-header-actions button {
+                padding: 10px 5px;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .summary-card {
+                padding: 15px;
+            }
+
+            .summary-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .summary-info p {
+                font-size: 20px;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-filter {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .table-container {
+                padding: 15px;
+            }
+
+            .table th,
+            .table td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+
+            /* Adjust Modal for Mobile */
+            .product-row {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 15px !important;
+            }
+
+            .product-row>div {
+                width: 100% !important;
+                flex: none !important;
+            }
+        }
     </style>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <span class="navbar-brand">
+            <a class="navbar-brand" href="{{ route('dashboard') }}">
                 <i class="bi bi-receipt"></i> Invoices App
-            </span>
+            </a>
 
-            <div class="nav-menu">
-                <div class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link active">
-                        <i class="bi bi-file-earmark-text"></i> Quản lý hóa đơn
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('customers.index') }}" class="nav-link">
-                        <i class="bi bi-people"></i> Quản lý khách hàng
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('transactions.index') }}" class="nav-link">
-                        <i class="bi bi-wallet2"></i> Quản lý thu chi
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('products.index') }}" class="nav-link">
-                        <i class="bi bi-box-seam"></i> Quản lý kho hàng
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('returns.index') }}" class="nav-link">
-                        <i class="bi bi-arrow-return-left"></i> Quản lý trả hàng
-                    </a>
-                </div>
-            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-            <div class="navbar-logout">
-                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                    </button>
-                </form>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="nav-menu">
+                    <div class="nav-item">
+                        <a href="{{ route('dashboard') }}" class="nav-link active">
+                            <i class="bi bi-file-earmark-text"></i> Quản lý hóa đơn
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="{{ route('customers.index') }}" class="nav-link">
+                            <i class="bi bi-people"></i> Quản lý khách hàng
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="{{ route('transactions.index') }}" class="nav-link">
+                            <i class="bi bi-wallet2"></i> Quản lý thu chi
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="{{ route('products.index') }}" class="nav-link">
+                            <i class="bi bi-box-seam"></i> Quản lý kho hàng
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="{{ route('returns.index') }}" class="nav-link">
+                            <i class="bi bi-arrow-return-left"></i> Quản lý trả hàng
+                        </a>
+                    </div>
+                </div>
+
+                <div class="navbar-logout">
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
